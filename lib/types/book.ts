@@ -29,6 +29,57 @@ export interface Subject {
   deletedAt?: string;
 }
 
+// Category types
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  parentId: string | null;
+  isHidden: boolean;
+  displayOrder: number;
+  icon: string | null;
+  route: string | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt?: string;
+  parent?: Category;
+  children?: Category[];
+  _count?: {
+    books: number;
+  };
+}
+
+export interface CreateCategoryDto {
+  name: string;
+  slug: string;
+  parentId?: string | null;
+  isHidden?: boolean;
+  displayOrder?: number;
+  icon?: string;
+  route?: string;
+}
+
+export interface UpdateCategoryDto {
+  name?: string;
+  slug?: string;
+  parentId?: string | null;
+  isHidden?: boolean;
+  displayOrder?: number;
+  icon?: string;
+  route?: string;
+}
+
+export interface CategoryMenuResponse {
+  id: string;
+  name: string;
+  slug: string;
+  icon: string | null;
+  route: string | null;
+  displayOrder: number;
+  isHidden: boolean;
+  children: CategoryMenuResponse[];
+}
+
 export interface BookAttachment {
   id: string;
   bookId: string;
@@ -81,10 +132,12 @@ export interface Book {
   thumbnail?: string;
   publicationId: string;
   subjectId: string;
+  categoryIds?: string[];
   createdAt: string;
   updatedAt: string;
   publication?: Publication;
   subject?: Subject;
+  categories?: Category[];
   attachments?: BookAttachment[];
   papers?: BookPaper[];
   priceRange?: PriceRange | null;
@@ -102,6 +155,7 @@ export interface CreateBookDto {
   status?: BookStatus;
   publicationId: string;
   subjectId: string;
+  categoryIds?: string[];
 }
 
 export interface UpdateBookDto {
@@ -115,6 +169,7 @@ export interface UpdateBookDto {
   status?: BookStatus;
   publicationId?: string;
   subjectId?: string;
+  categoryIds?: string[];
 }
 
 export interface CreateBookPaperDto {
@@ -243,12 +298,14 @@ export interface OrderItem {
   orderId: string;
   bookId: string;
   paperId?: string;
+  categoryId?: string;
   bookTitle: string;
   paperName?: string;
   paperPrice?: string;
   quantity: number;
   subtotal: string;
   paper?: OrderItemPaper;
+  category?: Category;
 }
 
 export interface Payment {
@@ -554,6 +611,15 @@ export interface PaymentMethodBreakdown {
   revenue: number;
 }
 
+export interface SalesByCategory {
+  categoryId: string;
+  categoryName: string;
+  isHidden: boolean;
+  orders: number;
+  revenue: number;
+  percentage: number;
+}
+
 export interface SalesAnalyticsData {
   period: string;
   dateRange: DateRange;
@@ -561,6 +627,7 @@ export interface SalesAnalyticsData {
   timeSeriesData: TimeSeriesData[];
   topProducts: TopProduct[];
   paymentMethodBreakdown: PaymentMethodBreakdown[];
+  salesByCategory?: SalesByCategory[];
 }
 
 export type SalesAnalyticsResponse = SalesAnalyticsData;

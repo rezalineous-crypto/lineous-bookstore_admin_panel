@@ -12,8 +12,9 @@ import type {
 } from "@/lib/types/book";
 
 // Get all orders
-export const getOrders = async (): Promise<ApiResponse<Order[]>> => {
-  const response = await apiClient.get<ApiResponse<Order[]>>("/orders");
+export const getOrders = async (categoryId?: string): Promise<ApiResponse<Order[]>> => {
+  const params = categoryId ? { categoryId } : {};
+  const response = await apiClient.get<ApiResponse<Order[]>>("/orders", { params });
   return response.data;
 };
 

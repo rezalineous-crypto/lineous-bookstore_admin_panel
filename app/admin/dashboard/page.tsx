@@ -1,20 +1,29 @@
 "use client";
 
+import { useState } from "react";
 import {
   useDashboardStats,
   useRefetchDashboard,
 } from "@/lib/hooks/use-dashboard";
+import { useSalesByCategory } from "@/lib/hooks/use-analytics";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
 import { OrderStatusBreakdown } from "@/components/dashboard/order-status-breakdown";
 import { TopSellingBooks } from "@/components/dashboard/top-selling-books";
 import { RecentOrders } from "@/components/dashboard/recent-orders";
 import { SalesTrend } from "@/components/dashboard/sales-trend";
+import { SalesByCategoryChart } from "@/components/analytics/sales-by-category";
 import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { useEffect } from "react";
 
+type Period = "day" | "week" | "month" | "year" | "custom";
+
 export default function DashboardPage() {
+  const [period, setPeriod] = useState<Period>("month");
   const { data, isLoading, error, refetch } = useDashboardStats();
+  const { data: salesByCategoryData, isLoading: categoryLoading } = useSalesByCategory({
+    period,
+  });
   const refetchDashboard = useRefetchDashboard();
 
   // Auto-refresh on mount
@@ -111,6 +120,12 @@ export default function DashboardPage() {
           totalOrders={data.kpis.totalOrders}
         />
       </div>
+
+      {/* Sales by Category */}
+      <SalesByCategoryChart
+        data={salesByCategoryData ?? []}
+        period={period}
+      />
 
       {/* Order Status Breakdown & Top Selling Books */}
       <div className="grid gap-6 lg:grid-cols-2">

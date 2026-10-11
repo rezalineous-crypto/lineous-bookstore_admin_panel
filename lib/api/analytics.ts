@@ -4,6 +4,7 @@ import type {
   SalesAnalyticsParams,
   CustomerInsightsData,
   CustomerInsightsParams,
+  SalesByCategory,
 } from "@/lib/types/book";
 
 // Get sales analytics with period filtering
@@ -11,6 +12,16 @@ export const getSalesAnalytics = async (
   params: SalesAnalyticsParams
 ): Promise<SalesAnalyticsData> => {
   const response = await apiClient.get<SalesAnalyticsData>("/admin/analytics/sales", {
+    params,
+  });
+  return response.data;
+};
+
+// Get sales by category
+export const getSalesByCategory = async (
+  params: SalesAnalyticsParams
+): Promise<SalesByCategory[]> => {
+  const response = await apiClient.get<SalesByCategory[]>("/admin/analytics/sales/by-category", {
     params,
   });
   return response.data;
@@ -37,6 +48,7 @@ export const getTopSellingBooks = async (params?: {
 
 export const analyticsApi = {
   getSalesAnalytics,
+  getSalesByCategory,
   getCustomerInsights,
   getTopSellingBooks,
 };

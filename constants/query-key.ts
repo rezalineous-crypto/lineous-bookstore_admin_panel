@@ -18,6 +18,7 @@ export const QueryKeys = {
     teachers: ["teachers"],
 
     categories: ["categories"],
+    categoriesMenu: ["categories", "menu"],
 
     banners: ["banners"],
 
@@ -49,4 +50,7 @@ export const QueryKeys = {
 
     customerInsights: (params: { period?: string }) =>
       ["analytics", "customers", params] as const,
+
+    salesByCategory: (params: { period: string; startDate?: string; endDate?: string; groupBy?: string }) =>
+      ["analytics", "sales", "by-category", params] as const,
 } as const;

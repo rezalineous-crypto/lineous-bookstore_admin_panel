@@ -74,6 +74,9 @@ export function BooksTable({ onView, onEdit, onDelete, onAddPaper }: BooksTableP
               Subject
             </th>
             <th className="px-6 py-4 font-semibold text-gray-500">
+              Categories
+            </th>
+            <th className="px-6 py-4 font-semibold text-gray-500">
               Price Range
             </th>
             <th className="px-6 py-4 font-semibold text-gray-500">
@@ -129,6 +132,23 @@ export function BooksTable({ onView, onEdit, onDelete, onAddPaper }: BooksTableP
 
               <td className="px-6 py-4 text-sm text-muted-foreground">
                 {book.subject?.name || book.subjectId || "-"}
+              </td>
+
+              <td className="px-6 py-4 text-sm">
+                {book.categories && book.categories.length > 0 ? (
+                  <div className="flex flex-wrap gap-1">
+                    {book.categories.map((category) => (
+                      <span
+                        key={category.id}
+                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary"
+                      >
+                        {category.name}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-muted-foreground">-</span>
+                )}
               </td>
 
               <td className="px-6 py-4 text-sm font-medium">

@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { analyticsApi } from "@/lib/api/analytics";
 import { QueryKeys } from "@/constants/query-key";
-import type { SalesAnalyticsParams, CustomerInsightsParams } from "@/lib/types/book";
+import type { SalesAnalyticsParams, CustomerInsightsParams, SalesByCategory } from "@/lib/types/book";
 
 // Hook to fetch sales analytics
 export function useSalesAnalytics(params: SalesAnalyticsParams) {
@@ -13,6 +13,20 @@ export function useSalesAnalytics(params: SalesAnalyticsParams) {
     queryFn: async () => {
       const response = await analyticsApi.getSalesAnalytics(params);
       return response ?? {};
+    },
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    retry: 1,
+    enabled: !!params.period,
+  });
+}
+
+// Hook to fetch sales by category
+export function useSalesByCategory(params: SalesAnalyticsParams) {
+  return useQuery({
+    queryKey: QueryKeys.salesByCategory(params),
+    queryFn: async () => {
+      const response = await analyticsApi.getSalesByCategory(params);
+      return response ?? [];
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     retry: 1,

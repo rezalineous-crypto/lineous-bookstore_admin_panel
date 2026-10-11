@@ -8,11 +8,11 @@ import { QueryKeys } from "@/constants/query-key";
 import type { CreateOrderDto, UpdateOrderStatusDto, UpdateOrderShippingDto } from "@/lib/types/book";
 
 // Hook to fetch all orders
-export function useOrders() {
+export function useOrders(categoryId?: string) {
   return useQuery({
-    queryKey: QueryKeys.orders,
+    queryKey: categoryId ? [...QueryKeys.orders, "category", categoryId] : QueryKeys.orders,
     queryFn: async () => {
-      const response = await ordersApi.getOrders();
+      const response = await ordersApi.getOrders(categoryId);
       return response.data;
     },
     staleTime: 5 * 60 * 1000,

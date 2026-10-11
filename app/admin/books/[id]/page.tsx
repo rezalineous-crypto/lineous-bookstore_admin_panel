@@ -13,6 +13,7 @@ import {
   Users,
   Clock,
   Edit3,
+  FolderTree,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -195,6 +196,24 @@ export default function BookDetailPage({ params }: BookDetailPageProps) {
                   <div>
                     <p className="text-xs text-muted-foreground">Subject</p>
                     <p className="font-semibold text-foreground">{book.subject.name}</p>
+                  </div>
+                </div>
+              )}
+
+              {book.categories && book.categories.length > 0 && (
+                <div className="flex items-center gap-3 rounded-xl bg-muted/30 p-4">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                    <FolderTree className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Categories</p>
+                    <div className="flex flex-wrap gap-1">
+                      {book.categories.map((category) => (
+                        <Badge key={category.id} variant="secondary" className="bg-primary/10 text-primary">
+                          {category.name}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

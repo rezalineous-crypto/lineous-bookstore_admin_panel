@@ -229,6 +229,7 @@ function OrderItemsTable({ order }: { order: Order }) {
           <tr className="border-b border-border/60 bg-muted/30 text-left text-muted-foreground">
             <th className="px-4 py-3 font-medium">Book</th>
             <th className="px-4 py-3 font-medium">Paper</th>
+            <th className="px-4 py-3 font-medium">Category</th>
             <th className="px-4 py-3 font-medium">Price</th>
             <th className="px-4 py-3 text-center font-medium">Qty</th>
             <th className="px-4 py-3 text-right font-medium">Subtotal</th>
@@ -240,6 +241,17 @@ function OrderItemsTable({ order }: { order: Order }) {
               <td className="px-4 py-3 font-medium">{item.bookTitle}</td>
               <td className="px-4 py-3 text-muted-foreground">
                 {item.paperName ?? item.paper?.name ?? "-"}
+              </td>
+              <td className="px-4 py-3">
+                {item.category ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                    {item.category.name}
+                  </span>
+                ) : item.categoryId ? (
+                  <span className="text-xs text-muted-foreground">Category ID: {item.categoryId.slice(0, 8)}...</span>
+                ) : (
+                  <span className="text-muted-foreground">—</span>
+                )}
               </td>
               <td className="px-4 py-3 text-muted-foreground">{formatBDT(item.paperPrice)}</td>
               <td className="px-4 py-3 text-center">{item.quantity}</td>

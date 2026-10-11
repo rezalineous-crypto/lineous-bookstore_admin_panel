@@ -3,6 +3,7 @@
 import { useState } from "react";
 import {
   useSalesAnalytics,
+  useSalesByCategory,
   useRefetchAnalytics,
 } from "@/lib/hooks/use-analytics";
 
@@ -13,6 +14,7 @@ import { SalesSummaryCards } from "@/components/analytics/sales-summary-cards";
 import { RevenueChart } from "@/components/analytics/revenue-chart";
 import { PaymentBreakdown } from "@/components/analytics/payment-breakdown";
 import { TopProductsTable } from "@/components/analytics/top-products-table";
+import { SalesByCategoryChart } from "@/components/analytics/sales-by-category";
 
 type Period = "day" | "week" | "month" | "year" | "custom";
 
@@ -23,6 +25,14 @@ export default function SalesAnalyticsPage() {
   const [endDate, setEndDate] = useState<string>("");
 
   const { data, isLoading, error, refetch } = useSalesAnalytics({
+    period,
+    ...(period === "custom" && startDate && endDate
+      ? { startDate, endDate }
+      : {}),
+    groupBy,
+  });
+
+  const { data: salesByCategoryData, isLoading: categoryLoading } = useSalesByCategory({
     period,
     ...(period === "custom" && startDate && endDate
       ? { startDate, endDate }
@@ -134,6 +144,12 @@ export default function SalesAnalyticsPage() {
         <RevenueChart data={data.timeSeriesData} />
         <PaymentBreakdown data={data.paymentMethodBreakdown} />
       </div>
+
+      {/* Sales by Category */}
+      <SalesByCategoryChart
+        data={salesByCategoryData ?? []}
+        period={period}
+      />
 
       {/* Top Products Table */}
       <TopProductsTable products={data.topProducts} />

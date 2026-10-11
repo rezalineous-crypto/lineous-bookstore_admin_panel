@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Loader2, Eye, Truck, FileText } from "lucide-react";
+import { Download, Loader2, Eye, Truck, FileText, Filter, X } from "lucide-react";
 
 import { useOrders, useUpdateOrderStatus, useDownloadReceipt, useGenerateReceipt } from "@/lib/hooks/use-orders";
-import type { Order, OrderStatus } from "@/lib/types/book";
+import { useCategories } from "@/lib/hooks/use-categories";
+import type { Order, OrderStatus, Category } from "@/lib/types/book";
 import { OrderStatusBadge, PaymentStatusBadge } from "./order-badges";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,9 @@ interface OrdersTableProps {
 }
 
 export function OrdersTable({ onView }: OrdersTableProps) {
-  const { data: orders, isLoading, error } = useOrders();
+  const { data: categories, isLoading: categoriesLoading } = useCategories();
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const { data: orders, isLoading, error } = useOrders(categoryFilter === "all" ? undefined : categoryFilter);
   const updateStatusMutation = useUpdateOrderStatus();
   const downloadReceipt = useDownloadReceipt();
   const generateReceipt = useGenerateReceipt();
@@ -65,6 +68,41 @@ export function OrdersTable({ onView }: OrdersTableProps) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-card">
+      {/* Category Filter */}
+      <div className="p-4 border-b border-border/60 bg-muted/30">
+        <div className="flex items-center gap-4">
+          <SearchableDropdown
+            items={[
+              { id: "all", label: "All Categories" },
+              ...(categories?.map((cat: Category) => ({
+                id: cat.id,
+                label: cat.name,
+              })) ?? []),
+            ]}
+            value={categoryFilter}
+            onChange={(item) => {
+              if (item) setCategoryFilter(item.id as string);
+            }}
+            placeholder="Filter by category"
+            buttonClassName="w-[200px] h-10"
+            renderSelected={(item) => (
+              <span className="flex-1 truncate">{item.label}</span>
+            )}
+          />
+          {categoryFilter !== "all" && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setCategoryFilter("all")}
+              title="Clear category filter"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </div>
+
       <table className="w-full">
        <thead className="bg-gray-100 font-bold">
           <tr className="border-b border-border/60 bg-muted/30 text-left text-sm">

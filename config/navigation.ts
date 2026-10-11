@@ -27,6 +27,11 @@ export const navigation = [
     icon: FolderTree,
   },
   {
+    title: "Categories",
+    href: "/admin/categories",
+    icon: FolderTree,
+  },
+  {
     title: "Publications",
     href: "/admin/publications",
     icon: Building2,
@@ -55,12 +60,6 @@ export const navigation = [
     href: "/admin/analytics/sales",
     icon: BarChart3,
   },
-
-  // {
-  //   title: "Categories",
-  //   href: "/categories",
-  //   icon: FolderTree,
-  // },
 
   // {
   //   title: "Teachers",

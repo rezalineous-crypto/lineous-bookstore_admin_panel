@@ -8,15 +8,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import {
   useCreateBook,
   useUpdateBook,
   usePublications,
   useSubjects,
 } from "@/lib/hooks/use-books";
+import { useCategories } from "@/lib/hooks/use-categories";
 import { PublicationDialog } from "@/components/publications/publication-dialog";
 import { SubjectDialog } from "@/components/subjects/subject-dialog";
-import type { Book, UpdateBookDto, BookStatus } from "@/lib/types/book";
+import type { Book, UpdateBookDto, BookStatus, Category } from "@/lib/types/book";
 
 type BookFormValues = {
   title: string;
@@ -29,6 +31,7 @@ type BookFormValues = {
   status?: BookStatus;
   publicationId: string;
   subjectId: string;
+  categoryIds: string[];
 };
 
 interface BookFormProps {
@@ -68,12 +71,14 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
         status: book.status as BookStatus,
         publicationId: book.publicationId || "",
         subjectId: book.subjectId || "",
+        categoryIds: book.categoryIds || [],
         thumbnail: book.thumbnail || "",
       }
     : null;
 
   const { data: publications = [] } = usePublications();
   const { data: subjects = [] } = useSubjects();
+  const { data: categories = [] } = useCategories();
 
   const createMutation = useCreateBook();
   const updateMutation = useUpdateBook();
@@ -90,6 +95,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       status: (book?.status as BookStatus) || "DRAFT",
       publicationId: book?.publicationId || "",
       subjectId: book?.subjectId || "",
+      categoryIds: book?.categoryIds || [],
     },
   });
 
@@ -138,6 +144,8 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       changes.publicationId = data.publicationId;
     if (data.subjectId !== originalValues?.subjectId)
       changes.subjectId = data.subjectId;
+    if (JSON.stringify(data.categoryIds) !== JSON.stringify(originalValues?.categoryIds))
+      changes.categoryIds = data.categoryIds;
 
     if (hasFiles) {
       // Use FormData when files are involved
@@ -178,6 +186,9 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       formData.append("status", data.status || "DRAFT");
       formData.append("publicationId", data.publicationId);
       formData.append("subjectId", data.subjectId);
+      data.categoryIds.forEach((catId) => {
+        formData.append("categoryIds", catId);
+      });
 
       if (thumbnailFile) {
         formData.append("thumbnail", thumbnailFile);
@@ -341,6 +352,33 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
             }}
             placeholder="Select status"
           />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="categoryIds">Categories</Label>
+          <MultiSelectDropdown
+            items={categories.map((cat) => ({
+              id: cat.id,
+              label: cat.name,
+              subLabel: cat.isHidden ? "Hidden" : undefined,
+            }))}
+            value={watch("categoryIds") || []}
+            onChange={(items) => {
+              setValue("categoryIds", items.map((i) => String(i.id)));
+            }}
+            placeholder="Select categories (optional)"
+            renderItem={(item, isSelected) => (
+              <>
+                <span className="flex-1">{item.label}</span>
+                {item.subLabel && (
+                  <span className="text-xs text-slate-400 ml-2">{item.subLabel}</span>
+                )}
+              </>
+            )}
+          />
+          <p className="text-xs text-muted-foreground">
+            Select one or more categories. Hidden categories are included.
+          </p>
         </div>
 
         <div className="space-y-2">
