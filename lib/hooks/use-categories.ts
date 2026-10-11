@@ -39,7 +39,7 @@ export function useCategoriesMenu() {
     queryKey: QueryKeys.categoriesMenu,
     queryFn: async () => {
       const response = await categoriesApi.getCategoriesMenu();
-      return response;
+      return response.data;
     },
     staleTime: 5 * 60 * 1000,
     retry: 1,

@@ -38,8 +38,8 @@ export const deleteCategory = async (id: string): Promise<ApiResponse<null>> => 
 };
 
 // Get categories menu (hierarchical structure for navbar)
-export const getCategoriesMenu = async (): Promise<CategoryMenuResponse[]> => {
-  const response = await apiClient.get<CategoryMenuResponse[]>("/categories/menu");
+export const getCategoriesMenu = async (): Promise<ApiResponse<CategoryMenuResponse[]>> => {
+  const response = await apiClient.get<ApiResponse<CategoryMenuResponse[]>>("/categories/menu");
   return response.data;
 };
 
