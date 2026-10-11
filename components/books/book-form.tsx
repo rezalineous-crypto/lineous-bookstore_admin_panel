@@ -18,7 +18,12 @@ import {
 import { useCategories } from "@/lib/hooks/use-categories";
 import { PublicationDialog } from "@/components/publications/publication-dialog";
 import { SubjectDialog } from "@/components/subjects/subject-dialog";
-import type { Book, UpdateBookDto, BookStatus, Category } from "@/lib/types/book";
+import type {
+  Book,
+  UpdateBookDto,
+  BookStatus,
+  Category,
+} from "@/lib/types/book";
 
 type BookFormValues = {
   title: string;
@@ -104,7 +109,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
   // Filter subjects by selected publication
   const filteredSubjects = selectedPublicationId
     ? subjects.filter(
-        (subject) => subject.publicationId === selectedPublicationId,
+        (subject) => subject.publicationId === selectedPublicationId
       )
     : subjects;
 
@@ -121,7 +126,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
   };
 
   const buildPartialUpdate = (
-    data: BookFormValues,
+    data: BookFormValues
   ): { data: UpdateBookDto | FormData; hasFiles: boolean } => {
     const hasFiles = !!thumbnailFile || attachmentFiles.length > 0;
     const changes: Record<string, unknown> = {};
@@ -144,7 +149,10 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       changes.publicationId = data.publicationId;
     if (data.subjectId !== originalValues?.subjectId)
       changes.subjectId = data.subjectId;
-    if (JSON.stringify(data.categoryIds) !== JSON.stringify(originalValues?.categoryIds))
+    if (
+      JSON.stringify(data.categoryIds) !==
+      JSON.stringify(originalValues?.categoryIds)
+    )
       changes.categoryIds = data.categoryIds;
 
     if (hasFiles) {
@@ -152,7 +160,13 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       const formData = new FormData();
       Object.entries(changes).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
-          formData.append(key, String(value));
+          if (key === "categoryIds" && Array.isArray(value)) {
+            value.forEach((catId) => {
+              formData.append("categoryIds[]", String(catId));
+            });
+          } else {
+            formData.append(key, String(value));
+          }
         }
       });
       if (thumbnailFile) {
@@ -187,7 +201,7 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
       formData.append("publicationId", data.publicationId);
       formData.append("subjectId", data.subjectId);
       data.categoryIds.forEach((catId) => {
-        formData.append("categoryIds", catId);
+        formData.append("categoryIds[]", catId);
       });
 
       if (thumbnailFile) {
@@ -364,14 +378,19 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
             }))}
             value={watch("categoryIds") || []}
             onChange={(items) => {
-              setValue("categoryIds", items.map((i) => String(i.id)));
+              setValue(
+                "categoryIds",
+                items.map((i) => String(i.id))
+              );
             }}
             placeholder="Select categories (optional)"
             renderItem={(item, isSelected) => (
               <>
                 <span className="flex-1">{item.label}</span>
                 {item.subLabel && (
-                  <span className="text-xs text-slate-400 ml-2">{item.subLabel}</span>
+                  <span className="text-xs text-slate-400 ml-2">
+                    {item.subLabel}
+                  </span>
                 )}
               </>
             )}
@@ -434,8 +453,8 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
             {createMutation.isPending || updateMutation.isPending
               ? "Saving..."
               : isEditing
-                ? "Update Book"
-                : "Create Book"}
+              ? "Update Book"
+              : "Create Book"}
           </Button>
         </div>
       </form>
