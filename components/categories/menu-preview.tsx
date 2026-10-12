@@ -88,11 +88,11 @@ export function MenuPreview({ className }: MenuPreviewProps) {
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-lg">Live Menu Preview</h3>
-        <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary">
+        {/* <span className="text-xs px-2 py-1 rounded bg-primary/10 text-primary">
           Customer Navbar
-        </span>
+        </span> */}
       </div>
-      <div className="rounded-lg border border-border/60 bg-card p-4 min-h-[200px]">
+      <div className="rounded-lg border border-border/60 bg-card min-h-[200px]">
         <nav className="space-y-1" aria-label="Category navigation preview">
           {renderMenu(menuData)}
         </nav>

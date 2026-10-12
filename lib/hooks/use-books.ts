@@ -45,7 +45,7 @@ export function useBooksTree() {
     queryKey: QueryKeys.booksTree,
     queryFn: async () => {
       const response = await booksApi.getBooksTree();
-      return response;
+      return response.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,

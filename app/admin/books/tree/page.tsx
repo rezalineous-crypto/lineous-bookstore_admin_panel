@@ -17,7 +17,7 @@ export default function BooksTreePage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Books Tree</h1>
           <p className="mt-2 text-muted-foreground">
-            Browse books organized by publication and subject.
+            Browse books organized by category, publication, and subject.
           </p>
         </div>
 

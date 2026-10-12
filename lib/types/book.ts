@@ -492,7 +492,7 @@ export interface PaginatedResponse<T> {
   limit?: number;
 }
 
-// Tree structure types
+// Tree structure types (new: Category → Publication → Subject → Books)
 export interface BookTreeBook {
   id: string;
   title: string;
@@ -519,6 +519,19 @@ export interface BookTreePublication {
     isActive: boolean;
   };
   subjects: BookTreeSubject[];
+}
+
+export interface BookTreeCategory {
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+    isHidden: boolean;
+    displayOrder: number;
+    icon: string | null;
+    route: string | null;
+  };
+  publications: BookTreePublication[];
 }
 
 // ==================== Dashboard & Analytics Types ====================

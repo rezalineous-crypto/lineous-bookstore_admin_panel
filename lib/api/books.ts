@@ -9,6 +9,7 @@ import type {
   BookPaper,
   CreateBookPaperDto,
   UpdateBookPaperDto,
+  BookTreeCategory,
 } from "@/lib/types/book";
 
 // Get all books
@@ -23,9 +24,9 @@ export const getBook = async (id: string): Promise<ApiResponse<Book>> => {
   return response.data;
 };
 
-// Get books in tree structure: publications > subjects > books
-export const getBooksTree = async (): Promise<BookTreePublication[]> => {
-  const response = await apiClient.get<BookTreePublication[]>("/books/tree");
+// Get books in tree structure: category → publication → subject → books
+export const getBooksTree = async (): Promise<ApiResponse<BookTreeCategory[]>> => {
+  const response = await apiClient.get<ApiResponse<BookTreeCategory[]>>("/books/tree");
   return response.data;
 };
 
