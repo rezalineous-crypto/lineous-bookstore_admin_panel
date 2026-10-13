@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { BooksTreeView } from "@/components/books/books-tree-view";
 import { useBooksTree } from "@/lib/hooks/use-books";
 
-export default function BooksTreePage() {
+export default function MenuTreePage() {
   const router = useRouter();
   const { data: treeData, isLoading, error } = useBooksTree();
 
@@ -15,7 +15,7 @@ export default function BooksTreePage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Books Tree</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Menu Tree</h1>
           <p className="mt-2 text-muted-foreground">
             Browse books organized by category, publication, and subject.
           </p>

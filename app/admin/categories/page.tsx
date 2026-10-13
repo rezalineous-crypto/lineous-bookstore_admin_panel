@@ -105,15 +105,8 @@ export default function CategoriesPage() {
 
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Categories Table - 3 columns */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-4 space-y-6">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>All Categories</CardTitle>
-              <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
-              </Button>
-            </CardHeader>
             <CardContent className="p-0">
               <CategoriesTable
                 onView={handleView}
@@ -136,13 +129,13 @@ export default function CategoriesPage() {
         </div>
 
         {/* Menu Preview - 1 column */}
-        <div className="lg:col-span-1">
+        {/* <div className="lg:col-span-1">
           <Card className="h-full sticky top-24">
             <CardContent className="p-6 h-full">
               <MenuPreview />
             </CardContent>
           </Card>
-        </div>
+        </div> */}
       </div>
 
       {/* Delete Confirmation Dialog */}

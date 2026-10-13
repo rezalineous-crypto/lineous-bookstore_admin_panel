@@ -5,6 +5,7 @@ import {
   ShoppingCart,
   Library,
   FolderTree,
+  ListTree,
   Star,
   Building2,
   BarChart3,
@@ -22,11 +23,6 @@ export const navigation = [
     icon: BookOpen,
   },
   {
-    title: "Books Tree",
-    href: "/admin/books/tree",
-    icon: FolderTree,
-  },
-  {
     title: "Categories",
     href: "/admin/categories",
     icon: FolderTree,
@@ -42,19 +38,21 @@ export const navigation = [
     href: "/admin/subjects",
     icon: Library,
   },
-
-  {
-    title: "Users",
-    href: "/admin/users",
-    icon: Users,
-  },
-
   {
     title: "Orders",
     href: "/admin/orders",
     icon: ShoppingCart,
   },
-
+  {
+    title: "Menu Tree",
+    href: "/admin/menu-tree",
+    icon: ListTree,
+  },
+  {
+    title: "Users",
+    href: "/admin/users",
+    icon: Users,
+  },
   {
     title: "Sales Analytics",
     href: "/admin/analytics/sales",
