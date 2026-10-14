@@ -1,4 +1,14 @@
-import { BookOpen, ShoppingCart, DollarSign, Users, Library, Building2, AlertTriangle, Clock, TrendingUp } from "lucide-react";
+import {
+  BookOpen,
+  ShoppingCart,
+  DollarSign,
+  Users,
+  Library,
+  Building2,
+  AlertTriangle,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import type { DashboardKpis } from "@/lib/types/book";
 
@@ -72,7 +82,7 @@ export function KpiCards({ kpis }: KpiCardsProps) {
         {primaryConfig.map((config) => (
           <Card
             key={config.key}
-            className="relative overflow-hidden border-border/60 bg-card shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
+            className="relative overflow-hidden border-border/60 bg-card shadow-card transition-all duration-300 hover:shadow-card-hover"
           >
             {/* faint oversized icon watermark for a bit of texture, standard on this kind of card */}
             <config.icon
@@ -86,22 +96,24 @@ export function KpiCards({ kpis }: KpiCardsProps) {
                 >
                   <config.icon className="h-5 w-5" />
                 </div>
-                <TrendingUp className="h-4 w-4 text-muted-foreground/40" />
+
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {config.label}
+                  </p>
+                  <h3 className="mt-1 text-3xl font-bold tracking-tight text-right">
+                    {formatValue(kpis[config.key], config.prefix)}
+                  </h3>
+                </div>
               </div>
-              <p className="mt-5 text-sm font-medium text-muted-foreground">
-                {config.label}
-              </p>
-              <h3 className="mt-1 text-3xl font-bold tracking-tight">
-                {formatValue(kpis[config.key], config.prefix)}
-              </h3>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* ── Tier 2 + Tier 3, side by side: catalogue counts vs. action items ── */}
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* Compact divided row instead of three separate boxes — these are related, so they read as one unit */}
+      {/* <div className="grid gap-6 lg:grid-cols-3">
+        Compact divided row instead of three separate boxes — these are related, so they read as one unit
         <Card className="border-border/60 bg-card shadow-card lg:col-span-2">
           <CardContent className="p-0">
             <div className="grid grid-cols-1 divide-y divide-border/60 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
@@ -124,7 +136,7 @@ export function KpiCards({ kpis }: KpiCardsProps) {
           </CardContent>
         </Card>
 
-        {/* Alerts — amber/rose left rail makes it unmistakably "needs attention", not a neutral stat */}
+        Alerts — amber/rose left rail makes it unmistakably "needs attention", not a neutral stat
         <Card className="border-border/60 bg-card shadow-card">
           <CardContent className="space-y-1 p-4">
             <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -136,16 +148,24 @@ export function KpiCards({ kpis }: KpiCardsProps) {
                 <div
                   key={config.key}
                   className={`flex items-center gap-3 rounded-lg border-l-2 px-2 py-3 transition-colors hover:bg-muted/50 ${
-                    isActive ? `border-l-current ${config.accent}` : "border-l-transparent"
+                    isActive
+                      ? `border-l-current ${config.accent}`
+                      : "border-l-transparent"
                   }`}
                 >
-                  <span className={`relative flex h-2 w-2 ${config.dot} rounded-full`}>
+                  <span
+                    className={`relative flex h-2 w-2 ${config.dot} rounded-full`}
+                  >
                     {isActive && (
-                      <span className={`absolute inline-flex h-full w-full animate-ping rounded-full ${config.dot} opacity-60`} />
+                      <span
+                        className={`absolute inline-flex h-full w-full animate-ping rounded-full ${config.dot} opacity-60`}
+                      />
                     )}
                   </span>
                   <config.icon className={`h-4 w-4 ${config.accent}`} />
-                  <p className="flex-1 text-sm text-foreground/80">{config.label}</p>
+                  <p className="flex-1 text-sm text-foreground/80">
+                    {config.label}
+                  </p>
                   <p className={`text-base font-bold ${config.accent}`}>
                     {formatValue(kpis[config.key])}
                   </p>
@@ -154,7 +174,7 @@ export function KpiCards({ kpis }: KpiCardsProps) {
             })}
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }

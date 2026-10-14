@@ -21,9 +21,10 @@ type Period = "day" | "week" | "month" | "year" | "custom";
 export default function DashboardPage() {
   const [period, setPeriod] = useState<Period>("month");
   const { data, isLoading, error, refetch } = useDashboardStats();
-  const { data: salesByCategoryData, isLoading: categoryLoading } = useSalesByCategory({
-    period,
-  });
+  const { data: salesByCategoryData, isLoading: categoryLoading } =
+    useSalesByCategory({
+      period,
+    });
   const refetchDashboard = useRefetchDashboard();
 
   // Auto-refresh on mount
@@ -122,10 +123,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Sales by Category */}
-      <SalesByCategoryChart
-        data={salesByCategoryData ?? []}
-        period={period}
-      />
+      <SalesByCategoryChart data={salesByCategoryData ?? []} period={period} />
 
       {/* Order Status Breakdown & Top Selling Books */}
       <div className="grid gap-6 lg:grid-cols-2">
