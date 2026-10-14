@@ -3,11 +3,10 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomTextarea } from "@/components/ui/custom-text-area";
 import { Label } from "@/components/ui/label";
 import {
   useCreatePublication,
@@ -34,13 +33,27 @@ interface PublicationFormProps {
   publication?: Publication | null;
   onSuccess?: () => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function PublicationForm({ publication, onSuccess, onCancel }: PublicationFormProps) {
+export function PublicationForm({
+  publication,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: PublicationFormProps) {
   const isEditing = !!publication;
 
   const createMutation = useCreatePublication();
   const updateMutation = useUpdatePublication();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const { register, handleSubmit, setValue, watch } = useForm<PublicationFormValues>({
     defaultValues: {
@@ -88,60 +101,60 @@ export function PublicationForm({ publication, onSuccess, onCancel }: Publicatio
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      id={formId}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 pt-6"
+    >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name *</Label>
-          <Input
-            id="name"
-            {...register("name")}
-            placeholder="Enter publication name"
-          />
-        </div>
+        <CustomInput
+          id="name"
+          label="Name"
+          placeholder="Enter publication name"
+          {...register("name")}
+          required
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug *</Label>
-          <Input
-            id="slug"
-            {...register("slug")}
-            placeholder="enter-publication-slug"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          {...register("description")}
-          placeholder="Publication description"
-          rows={3}
+        <CustomInput
+          id="slug"
+          label="Slug"
+          placeholder="enter-publication-slug"
+          {...register("slug")}
+          required
         />
       </div>
 
+      <CustomTextarea
+        id="description"
+        label="Description"
+        placeholder="Publication description"
+        {...register("description")}
+      />
+
       <div className="space-y-2">
-        <Label htmlFor="logo">Logo URL</Label>
-        <Input
+        <CustomInput
           id="logo"
-          {...register("logo")}
+          label="Logo URL"
           placeholder="https://example.com/logo.png"
+          {...register("logo")}
         />
         <p className="text-xs text-muted-foreground">
           Enter a fully qualified URL for the publication logo
         </p>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="status">Status</Label>
-        <SearchableDropdown
-          items={BookStatusEnum.map((status) => ({ id: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))}
-          value={watch("status") || "PUBLISHED"}
-          onChange={(item) => {
-            if (item) setValue("status", item.id as BookStatus);
-          }}
-          placeholder="Select status"
-        />
-      </div>
+      <SearchableDropdown
+        label="Status"
+        items={BookStatusEnum.map((status) => ({
+          id: status,
+          label: status.charAt(0) + status.slice(1).toLowerCase(),
+        }))}
+        value={watch("status") || "PUBLISHED"}
+        onChange={(item) => {
+          if (item) setValue("status", item.id as BookStatus);
+        }}
+        placeholder="Select status"
+      />
 
       <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
         <div className="space-y-0.5">
@@ -159,24 +172,6 @@ export function PublicationForm({ publication, onSuccess, onCancel }: Publicatio
           checked={watch("isActive") ?? true}
           onCheckedChange={(checked) => setValue("isActive", checked)}
         />
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-        >
-          {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
-            : isEditing
-            ? "Update Publication"
-            : "Create Publication"}
-        </Button>
       </div>
     </form>
   );

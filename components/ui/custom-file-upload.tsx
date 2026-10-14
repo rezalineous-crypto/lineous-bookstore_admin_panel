@@ -76,10 +76,10 @@ export function CustomFileUpload({
         {label && (
           <label
             className={cn(
-              "pointer-events-none absolute left-3 z-10 origin-left transition-all duration-200 ease-out",
+              "pointer-events-none absolute z-10 origin-left transition-all duration-200 ease-out",
               isFloating
-                ? "-top-6 scale-90 text-sm font-bold text-blue-600 dark:text-blue-400"
-                : "top-1/2 -translate-y-1/2 text-sm text-slate-500 dark:text-slate-400"
+                ? "left-3 -top-6 scale-90 text-sm font-bold text-blue-600 dark:text-blue-400"
+                : "left-9 top-1/2 -translate-y-1/2 text-sm text-slate-500 dark:text-slate-400"
             )}
           >
             {label}
@@ -92,7 +92,7 @@ export function CustomFileUpload({
 
           <span
             className={cn(
-              "flex-1 truncate text-sm lg:ml-5",
+              "flex-1 truncate text-sm",
               fileName ? "text-slate-900" : "text-slate-400",
               label && !isFloating && "invisible"
             )}

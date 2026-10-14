@@ -1,11 +1,10 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomTextarea } from "@/components/ui/custom-text-area";
 import {
   useCreateReview,
   useUpdateReview,
@@ -26,13 +25,28 @@ interface ReviewFormProps {
   bookId?: string;
   onSuccess?: () => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function ReviewForm({ review, bookId, onSuccess, onCancel }: ReviewFormProps) {
+export function ReviewForm({
+  review,
+  bookId,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: ReviewFormProps) {
   const isEditing = !!review;
 
   const createMutation = useCreateReview();
   const updateMutation = useUpdateReview();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const { register, handleSubmit, setValue, watch } = useForm<ReviewFormValues>({
     defaultValues: {
@@ -63,89 +77,66 @@ export function ReviewForm({ review, bookId, onSuccess, onCancel }: ReviewFormPr
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      id={formId}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 pt-6"
+    >
       {!bookId && (
-        <div className="space-y-2">
-          <Label htmlFor="bookId">Book ID *</Label>
-          <Input
-            id="bookId"
-            {...register("bookId")}
-            placeholder="Enter book ID"
-          />
-        </div>
+        <CustomInput
+          id="bookId"
+          label="Book ID"
+          placeholder="Enter book ID"
+          {...register("bookId")}
+          required
+        />
       )}
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="reviewerName">Reviewer Name *</Label>
-          <Input
-            id="reviewerName"
-            {...register("reviewerName")}
-            placeholder="Enter reviewer name"
-          />
-        </div>
+        <CustomInput
+          id="reviewerName"
+          label="Reviewer Name"
+          placeholder="Enter reviewer name"
+          {...register("reviewerName")}
+          required
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="designation">Designation</Label>
-          <Input
-            id="designation"
-            {...register("designation")}
-            placeholder="e.g. Professor, Senior Editor"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="rating">Rating *</Label>
-          <Input
-            id="rating"
-            type="number"
-            min={1}
-            max={5}
-            {...register("rating", { valueAsNumber: true })}
-            placeholder="1-5"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="displayOrder">Display Order</Label>
-          <Input
-            id="displayOrder"
-            type="number"
-            {...register("displayOrder", { valueAsNumber: true })}
-            placeholder="0"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="comment">Comment</Label>
-        <Textarea
-          id="comment"
-          {...register("comment")}
-          placeholder="Review comment/testimonial"
-          rows={4}
+        <CustomInput
+          id="designation"
+          label="Designation"
+          placeholder="e.g. Professor, Senior Editor"
+          {...register("designation")}
         />
       </div>
 
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-        >
-          {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
-            : isEditing
-            ? "Update Review"
-            : "Create Review"}
-        </Button>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <CustomInput
+          id="rating"
+          label="Rating"
+          type="number"
+          min={1}
+          max={5}
+          placeholder="1-5"
+          {...register("rating", { valueAsNumber: true })}
+          required
+        />
+
+        <CustomInput
+          id="displayOrder"
+          label="Display Order"
+          type="number"
+          placeholder="0"
+          {...register("displayOrder", { valueAsNumber: true })}
+        />
       </div>
+
+      <CustomTextarea
+        id="comment"
+        label="Comment"
+        placeholder="Review comment/testimonial"
+        rows={4}
+        {...register("comment")}
+      />
     </form>
   );
 }

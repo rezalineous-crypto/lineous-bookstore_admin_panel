@@ -30,7 +30,7 @@ const floatingLabelStyle =
   "peer-[:not(:placeholder-shown)]:-top-6 " +
   "peer-[:not(:placeholder-shown)]:translate-y-0 " +
   "peer-[:not(:placeholder-shown)]:scale-90 " +
-  "peer-[:not(:placeholder-shown)]:text-gray-600 peer-[:not(:placeholder-shown)]:font-bold " +
+  "peer-[:not(:placeholder-shown)]:text-gray-600 peer-[:not(:placeholder-shown)]:font-bold peer-[:not(:placeholder-shown)]:left-1 " +
   "dark:text-slate-400 dark:peer-focus:text-gray-400";
 
 function CustomInput({

@@ -3,11 +3,10 @@
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { CustomInput } from "@/components/ui/custom-input";
 import {
   useCreateCategory,
   useUpdateCategory,
@@ -30,9 +29,16 @@ interface CategoryFormProps {
   category?: Category | null;
   onSuccess?: (categoryId?: string) => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProps) {
+export function CategoryForm({
+  category,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: CategoryFormProps) {
   const isEditing = !!category;
   const { data: categories = [] } = useCategories();
 
@@ -41,6 +47,13 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
 
   const createMutation = useCreateCategory();
   const updateMutation = useUpdateCategory();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const { register, handleSubmit, setValue, watch, reset } = useForm<CategoryFormValues>({
     defaultValues: {
@@ -91,30 +104,32 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      id={formId}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 pt-6"
+    >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name *</Label>
-          <Input
-            id="name"
-            {...register("name", { required: "Name is required" })}
-            placeholder="Enter category name"
-          />
-        </div>
+        <CustomInput
+          id="name"
+          label="Name"
+          placeholder="Enter category name"
+          {...register("name", { required: "Name is required" })}
+          required
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug *</Label>
-          <Input
-            id="slug"
-            {...register("slug", { required: "Slug is required" })}
-            placeholder="enter-category-slug"
-          />
-        </div>
+        <CustomInput
+          id="slug"
+          label="Slug"
+          placeholder="enter-category-slug"
+          {...register("slug", { required: "Slug is required" })}
+          required
+        />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="parentId">Parent Category</Label>
+      <div className="space-y-2 mb-10">
         <SearchableDropdown
+          label="Parent Category"
           items={availableParents.map((cat) => ({
             id: cat.id,
             label: cat.name,
@@ -134,36 +149,34 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="space-y-2">
-          <Label htmlFor="displayOrder">Display Order</Label>
-          <Input
-            id="displayOrder"
-            type="number"
-            {...register("displayOrder", { valueAsNumber: true })}
-            placeholder="0"
-            min="0"
-          />
-        </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <CustomInput
+          id="displayOrder"
+          label="Display Order"
+          type="number"
+          placeholder="0"
+          min="0"
+          {...register("displayOrder", { valueAsNumber: true })}
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="icon">Icon</Label>
-          <Input
+        {/* <div className="space-y-2">
+          <CustomInput
             id="icon"
-            {...register("icon")}
+            label="Icon"
             placeholder="file-text"
+            {...register("icon")}
           />
           <p className="text-xs text-muted-foreground">
             Lucide icon name (e.g., file-text, book-open)
           </p>
-        </div>
+        </div> */}
 
         <div className="space-y-2">
-          <Label htmlFor="route">Route</Label>
-          <Input
+          <CustomInput
             id="route"
-            {...register("route")}
+            label="Route"
             placeholder="/category-slug"
+            {...register("route")}
           />
           <p className="text-xs text-muted-foreground">
             URL path for menu item (e.g., /topical-past-papers)
@@ -172,7 +185,7 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="isHidden">Hidden from Customer Navbar</Label>
+        {/* <Label htmlFor="isHidden">Hidden from Customer Navbar</Label> */}
         <div className="flex items-center gap-2">
           <Switch
             id="isHidden"
@@ -183,24 +196,6 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
             Hide this category from the customer-facing navigation menu
           </span>
         </div>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-        >
-          {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
-            : isEditing
-            ? "Update Category"
-            : "Create Category"}
-        </Button>
       </div>
     </form>
   );

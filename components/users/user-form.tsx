@@ -1,11 +1,10 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { CustomInput } from "@/components/ui/custom-input";
 import {
   useCreateUser,
   useUpdateUser,
@@ -28,13 +27,27 @@ interface UserFormProps {
   user?: User | null;
   onSuccess?: () => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
+export function UserForm({
+  user,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: UserFormProps) {
   const isEditing = !!user;
 
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const { register, handleSubmit, setValue, watch } = useForm<UserFormValues>({
     defaultValues: {
@@ -80,112 +93,83 @@ export function UserForm({ user, onSuccess, onCancel }: UserFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      id={formId}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 pt-6"
+    >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email *</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register("email")}
-            placeholder="user@example.com"
-          />
-        </div>
+        <CustomInput
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="user@example.com"
+          {...register("email")}
+          required
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="phone">Phone</Label>
-          <Input
-            id="phone"
-            {...register("phone")}
-            placeholder="+8801712345678"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
-          <Input
-            id="firstName"
-            {...register("firstName")}
-            placeholder="John"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input
-            id="lastName"
-            {...register("lastName")}
-            placeholder="Doe"
-          />
-        </div>
-      </div>
-
-      {!isEditing && (
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            {...register("password")}
-            placeholder="Min. 6 characters"
-          />
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="role">Role</Label>
-          <SearchableDropdown
-            items={UserRoleEnum.map((role) => ({ id: role, label: role }))}
-            value={watch("role") || "USER"}
-            onChange={(item) => {
-              if (item) setValue("role", item.id as UserRole);
-            }}
-            placeholder="Select role"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <SearchableDropdown
-            items={UserStatusEnum.map((status) => ({ id: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))}
-            value={watch("status") || "ACTIVE"}
-            onChange={(item) => {
-              if (item) setValue("status", item.id as UserStatus);
-            }}
-            placeholder="Select status"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="avatar">Avatar URL</Label>
-        <Input
-          id="avatar"
-          {...register("avatar")}
-          placeholder="https://example.com/avatar.png"
+        <CustomInput
+          id="phone"
+          label="Phone"
+          placeholder="+8801712345678"
+          {...register("phone")}
         />
       </div>
 
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-        >
-          {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
-            : isEditing
-            ? "Update User"
-            : "Create User"}
-        </Button>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <CustomInput
+          id="firstName"
+          label="First Name"
+          placeholder="John"
+          {...register("firstName")}
+        />
+
+        <CustomInput
+          id="lastName"
+          label="Last Name"
+          placeholder="Doe"
+          {...register("lastName")}
+        />
       </div>
+
+      {!isEditing && (
+        <CustomInput
+          id="password"
+          label="Password"
+          type="password"
+          placeholder="Min. 6 characters"
+          {...register("password")}
+        />
+      )}
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <SearchableDropdown
+          label="Role"
+          items={UserRoleEnum.map((role) => ({ id: role, label: role }))}
+          value={watch("role") || "USER"}
+          onChange={(item) => {
+            if (item) setValue("role", item.id as UserRole);
+          }}
+          placeholder="Select role"
+        />
+
+        <SearchableDropdown
+          label="Status"
+          items={UserStatusEnum.map((status) => ({ id: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))}
+          value={watch("status") || "ACTIVE"}
+          onChange={(item) => {
+            if (item) setValue("status", item.id as UserStatus);
+          }}
+          placeholder="Select status"
+        />
+      </div>
+
+      <CustomInput
+        id="avatar"
+        label="Avatar URL"
+        placeholder="https://example.com/avatar.png"
+        {...register("avatar")}
+      />
     </form>
   );
 }

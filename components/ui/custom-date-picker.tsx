@@ -180,10 +180,10 @@ export function CustomDatePicker({
         {label && (
           <label
             className={cn(
-              "pointer-events-none absolute left-3 z-10 origin-left transition-all duration-200 ease-out",
+              "pointer-events-none absolute z-10 origin-left transition-all duration-200 ease-out",
               isFloating
-                ? "-top-6 scale-90 text-sm font-bold text-gray-600 dark:text-gray-400"
-                : "top-1/2 -translate-y-1/2 text-sm text-slate-500 dark:text-slate-400"
+                ? "left-3 -top-6 scale-90 text-sm font-bold text-gray-600 dark:text-gray-400"
+                : "left-9 top-1/2 -translate-y-1/2 text-sm text-slate-500 dark:text-slate-400"
             )}
           >
             {label}

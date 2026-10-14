@@ -1,12 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { CustomModal } from "@/components/ui/custom-modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
@@ -68,38 +63,32 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
   const isShippingMissing = order ? parseFloat(order.shipping ?? "0") === 0 : true;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        {isLoading && (
-          <div className="flex h-64 items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        )}
+    <CustomModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title={order?.orderNumber ?? "Order details"}
+      description={order ? `Placed ${formatDateTime(order.createdAt)}` : undefined}
+      className="sm:max-w-3xl"
+    >
+      {isLoading && (
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
 
-        {error && !isLoading && (
-          <div className="flex h-64 items-center justify-center">
-            <p className="text-destructive">
-              {error instanceof Error ? error.message : "Failed to load order"}
-            </p>
-          </div>
-        )}
+      {error && !isLoading && (
+        <div className="flex h-64 items-center justify-center">
+          <p className="text-destructive">
+            {error instanceof Error ? error.message : "Failed to load order"}
+          </p>
+        </div>
+      )}
 
-        {order && !isLoading && (
-          <>
-            <DialogHeader>
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <DialogTitle className="font-mono text-base">{order.orderNumber}</DialogTitle>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Placed {formatDateTime(order.createdAt)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <OrderStatusBadge status={order.status} />
-                  {/* <PaymentStatusBadge status={order.paymentStatus} /> */}
-                </div>
-              </div>
-            </DialogHeader>
+      {order && !isLoading && (
+        <div className="space-y-6 pt-6">
+          <div className="flex items-center gap-2">
+            <OrderStatusBadge status={order.status} />
+          </div>
 
             {/* Amount summary */}
             <div className="grid grid-cols-2 gap-4 rounded-xl border border-border/60 bg-muted/30 p-4 sm:grid-cols-4">
@@ -200,10 +189,9 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
               open={shippingDialogOpen}
               onOpenChange={setShippingDialogOpen}
             />
-          </>
+          </div>
         )}
-      </DialogContent>
-    </Dialog>
+    </CustomModal>
   );
 }
 

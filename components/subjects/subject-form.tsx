@@ -3,11 +3,10 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomTextarea } from "@/components/ui/custom-text-area";
 import { Label } from "@/components/ui/label";
 import {
   useCreateSubject,
@@ -29,14 +28,28 @@ interface SubjectFormProps {
   subject?: Subject | null;
   onSuccess?: () => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function SubjectForm({ subject, onSuccess, onCancel }: SubjectFormProps) {
+export function SubjectForm({
+  subject,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: SubjectFormProps) {
   const isEditing = !!subject;
 
   const createMutation = useCreateSubject();
   const updateMutation = useUpdateSubject();
   const { data: publications = [] } = usePublications();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const { register, handleSubmit, setValue, watch } = useForm<SubjectFormValues>({
     defaultValues: {
@@ -74,45 +87,44 @@ export function SubjectForm({ subject, onSuccess, onCancel }: SubjectFormProps) 
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form
+      id={formId}
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 pt-6"
+    >
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="name">Name *</Label>
-          <Input
-            id="name"
-            {...register("name")}
-            placeholder="Enter subject name"
-          />
-        </div>
+        <CustomInput
+          id="name"
+          label="Name"
+          placeholder="Enter subject name"
+          {...register("name")}
+          required
+        />
 
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug *</Label>
-          <Input
-            id="slug"
-            {...register("slug")}
-            placeholder="enter-subject-slug"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          {...register("description")}
-          placeholder="Subject description"
-          rows={3}
+        <CustomInput
+          id="slug"
+          label="Slug"
+          placeholder="enter-subject-slug"
+          {...register("slug")}
+          required
         />
       </div>
 
+      <CustomTextarea
+        id="description"
+        label="Description"
+        placeholder="Subject description"
+        {...register("description")}
+      />
+
       <div className="space-y-2">
-        <Label htmlFor="publicationId">Publication</Label>
         <SearchableDropdown
+          label="Publication"
           items={publications.map((pub) => ({ id: pub.id, label: pub.name }))}
           value={watch("publicationId") || ""}
-            onChange={(item) => {
-              if (item) setValue("publicationId", String(item.id) || undefined);
-            }}
+          onChange={(item) => {
+            if (item) setValue("publicationId", String(item.id) || undefined);
+          }}
           placeholder="Select publication (optional)"
         />
         <p className="text-xs text-muted-foreground">
@@ -136,24 +148,6 @@ export function SubjectForm({ subject, onSuccess, onCancel }: SubjectFormProps) 
           checked={watch("isActive") ?? true}
           onCheckedChange={(checked) => setValue("isActive", checked)}
         />
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={createMutation.isPending || updateMutation.isPending}
-        >
-          {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
-            : isEditing
-            ? "Update Subject"
-            : "Create Subject"}
-        </Button>
       </div>
     </form>
   );

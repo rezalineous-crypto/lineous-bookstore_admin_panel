@@ -1,16 +1,30 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useState, type ChangeEvent } from "react";
+import { useState, useEffect, type ChangeEvent, type ReactNode } from "react";
+import {
+  DollarSign,
+  Image as ImageIcon,
+  Info,
+  Package,
+  type LucideIcon,
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomDatePicker } from "@/components/ui/custom-date-picker";
+import { CustomFileUpload } from "@/components/ui/custom-file-upload";
+import { CustomCheckbox } from "@/components/ui/custom-checkbox";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useCreateBookPaper, useUpdateBookPaper } from "@/lib/hooks/use-books";
-import type { BookPaper, CreateBookPaperDto, UpdateBookPaperDto } from "@/lib/types/book";
+import type {
+  BookPaper,
+  CreateBookPaperDto,
+  UpdateBookPaperDto,
+} from "@/lib/types/book";
 
 type BookPaperFormValues = {
   code?: string;
@@ -32,15 +46,77 @@ interface BookPaperFormProps {
   paper?: BookPaper | null;
   onSuccess?: () => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function BookPaperForm({ bookId, paper, onSuccess, onCancel }: BookPaperFormProps) {
+function FormSection({
+  icon: Icon,
+  title,
+  description,
+  iconClassName,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description?: string;
+  iconClassName?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="rounded-xl border border-border/70 bg-background p-5 shadow-sm sm:p-6">
+      <div className="flex items-center gap-3 border-b border-border/70 pb-4">
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+            iconClassName
+          )}
+        >
+          <Icon className="h-5 w-5" />
+        </span>
+        <div>
+          <h3 className="text-base font-semibold tracking-tight text-foreground">
+            {title}
+          </h3>
+          {description && (
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+      <div className="space-y-5 pt-5">{children}</div>
+    </section>
+  );
+}
+
+export function BookPaperForm({
+  bookId,
+  paper,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: BookPaperFormProps) {
   const isEditing = !!paper;
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+  const [showDiscount, setShowDiscount] = useState(
+    !!(
+      paper?.discountPrice ||
+      paper?.discountStartDate ||
+      paper?.discountEndDate
+    )
+  );
 
   const createMutation = useCreateBookPaper();
   const updateMutation = useUpdateBookPaper();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const {
     register,
@@ -66,7 +142,6 @@ export function BookPaperForm({ bookId, paper, onSuccess, onCancel }: BookPaperF
   });
 
   const watchPrice = watch("price");
-  const watchDiscountPrice = watch("discountPrice");
 
   const handleThumbnailChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,9 +152,21 @@ export function BookPaperForm({ bookId, paper, onSuccess, onCancel }: BookPaperF
     }
   };
 
+  const handleDiscountToggle = (checked: boolean) => {
+    setShowDiscount(checked);
+    if (!checked) {
+      // Clear discount values so they aren't submitted while hidden.
+      setValue("discountPrice", "");
+      setValue("discountStartDate", "");
+      setValue("discountEndDate", "");
+    }
+  };
+
   const onSubmit = async (data: BookPaperFormValues) => {
     const price = parseFloat(data.price);
-    const discountPrice = data.discountPrice ? parseFloat(data.discountPrice) : undefined;
+    const discountPrice = data.discountPrice
+      ? parseFloat(data.discountPrice)
+      : undefined;
 
     // Validate discount price
     if (discountPrice !== undefined && discountPrice > price) {
@@ -102,12 +189,16 @@ export function BookPaperForm({ bookId, paper, onSuccess, onCancel }: BookPaperF
         formData.append("code", data.code || "");
         formData.append("name", data.name);
         formData.append("price", String(price));
-        if (discountPrice !== undefined) formData.append("discountPrice", String(discountPrice));
-        if (data.discountStartDate) formData.append("discountStartDate", data.discountStartDate);
-        if (data.discountEndDate) formData.append("discountEndDate", data.discountEndDate);
+        if (discountPrice !== undefined)
+          formData.append("discountPrice", String(discountPrice));
+        if (data.discountStartDate)
+          formData.append("discountStartDate", data.discountStartDate);
+        if (data.discountEndDate)
+          formData.append("discountEndDate", data.discountEndDate);
         formData.append("stock", String(parseInt(data.stock) || 0));
         if (data.isbn) formData.append("isbn", data.isbn);
-        if (data.pageCount) formData.append("pageCount", String(parseInt(data.pageCount)));
+        if (data.pageCount)
+          formData.append("pageCount", String(parseInt(data.pageCount)));
         formData.append("sortOrder", String(parseInt(data.sortOrder) || 0));
         formData.append("isDefault", String(data.isDefault));
         formData.append("status", data.status);
@@ -150,12 +241,16 @@ export function BookPaperForm({ bookId, paper, onSuccess, onCancel }: BookPaperF
       if (data.code) formData.append("code", data.code);
       formData.append("name", data.name);
       formData.append("price", String(price));
-      if (discountPrice !== undefined) formData.append("discountPrice", String(discountPrice));
-      if (data.discountStartDate) formData.append("discountStartDate", data.discountStartDate);
-      if (data.discountEndDate) formData.append("discountEndDate", data.discountEndDate);
+      if (discountPrice !== undefined)
+        formData.append("discountPrice", String(discountPrice));
+      if (data.discountStartDate)
+        formData.append("discountStartDate", data.discountStartDate);
+      if (data.discountEndDate)
+        formData.append("discountEndDate", data.discountEndDate);
       formData.append("stock", String(parseInt(data.stock) || 0));
       if (data.isbn) formData.append("isbn", data.isbn);
-      if (data.pageCount) formData.append("pageCount", String(parseInt(data.pageCount)));
+      if (data.pageCount)
+        formData.append("pageCount", String(parseInt(data.pageCount)));
       formData.append("sortOrder", String(parseInt(data.sortOrder) || 0));
       formData.append("isDefault", String(data.isDefault));
       formData.append("status", data.status);
@@ -174,200 +269,208 @@ export function BookPaperForm({ bookId, paper, onSuccess, onCancel }: BookPaperF
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="code">Code</Label>
-          <Input
+    <form id={formId} onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {/* 01 — Basic information */}
+      <FormSection
+        icon={Info}
+        iconClassName="bg-blue-500/10 text-blue-600"
+        title="Basic information"
+        // description="The essential details that identify this paper variant."
+      >
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="space-y-2">
+            <CustomInput
+              id="name"
+              label="Name"
+              placeholder="Paper A"
+              {...register("name", { required: "Name is required" })}
+              required
+            />
+            {errors.name && (
+              <p className="text-xs text-destructive">{errors.name.message}</p>
+            )}
+          </div>
+          
+          <CustomInput
             id="code"
-            {...register("code")}
+            label="Code"
             placeholder="A, MCQ, ENG"
+            {...register("code")}
           />
         </div>
+      </FormSection>
 
+      {/* 02 — Pricing */}
+      <FormSection
+        icon={DollarSign}
+        iconClassName="bg-emerald-500/10 text-emerald-600"
+        title="Pricing"
+        // description="Set the base price and an optional discount."
+      >
         <div className="space-y-2">
-          <Label htmlFor="name">Name *</Label>
-          <Input
-            id="name"
-            {...register("name", { required: "Name is required" })}
-            placeholder="Paper A"
-          />
-          {errors.name && (
-            <p className="text-xs text-destructive">{errors.name.message}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="price">Price *</Label>
-          <Input
+          <CustomInput
             id="price"
+            label="Price"
             type="number"
             step="0.01"
-            {...register("price", { required: "Price is required", min: 0 })}
             placeholder="0.00"
+            {...register("price", { required: "Price is required", min: 0 })}
+            required
           />
           {errors.price && (
             <p className="text-xs text-destructive">{errors.price.message}</p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="discountPrice">Discount Price</Label>
-          <Input
-            id="discountPrice"
-            type="number"
-            step="0.01"
-            {...register("discountPrice", {
-              min: 0,
-              validate: (val) => {
-                if (!val) return true;
-                const price = parseFloat(watchPrice);
-                if (parseFloat(val) > price) {
-                  return "Discount price cannot exceed base price";
-                }
-                return true;
-              },
-            })}
-            placeholder="0.00"
-          />
-          {errors.discountPrice && (
-            <p className="text-xs text-destructive">{errors.discountPrice.message}</p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="discountStartDate">Discount Start Date</Label>
-          <Input
-            id="discountStartDate"
-            type="date"
-            {...register("discountStartDate")}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="discountEndDate">Discount End Date</Label>
-          <Input
-            id="discountEndDate"
-            type="date"
-            {...register("discountEndDate")}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="stock">Stock</Label>
-          <Input
-            id="stock"
-            type="number"
-            {...register("stock")}
-            placeholder="0"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="isbn">ISBN</Label>
-          <Input
-            id="isbn"
-            {...register("isbn")}
-            placeholder="978-..."
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="pageCount">Page Count</Label>
-          <Input
-            id="pageCount"
-            type="number"
-            {...register("pageCount")}
-            placeholder="300"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="sortOrder">Sort Order</Label>
-          <Input
-            id="sortOrder"
-            type="number"
-            {...register("sortOrder")}
-            placeholder="0"
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="thumbnail">Paper Thumbnail</Label>
-        <Input
-          id="thumbnail"
-          type="file"
-          accept="image/*"
-          onChange={handleThumbnailChange}
+        <CustomCheckbox
+          checked={showDiscount}
+          onCheckedChange={handleDiscountToggle}
+          label="Enable discount"
+          description="Offer a discounted price, optionally within a date range."
         />
-        {(thumbnailPreview || (paper?.thumbnail && !thumbnailFile)) && (
-          <div className="mt-2">
-            <p className="mb-1 text-sm text-muted-foreground">
-              {thumbnailFile ? "New Thumbnail Preview:" : "Current Thumbnail:"}
-            </p>
-            <img
-              src={thumbnailPreview || paper?.thumbnail}
-              alt={thumbnailFile ? "Thumbnail preview" : "Current thumbnail"}
-              className="h-24 w-16 rounded-md object-cover"
+
+        {showDiscount && (
+          <div className="space-y-5 animate-in fade-in-0 slide-in-from-top-2 duration-300">
+            <div className="space-y-2">
+              <CustomInput
+                id="discountPrice"
+                label="Discount Price"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                {...register("discountPrice", {
+                  min: 0,
+                  validate: (val) => {
+                    if (!val) return true;
+                    const price = parseFloat(watchPrice);
+                    if (parseFloat(val) > price) {
+                      return "Discount price cannot exceed base price";
+                    }
+                    return true;
+                  },
+                })}
+              />
+              {errors.discountPrice && (
+                <p className="text-xs text-destructive">
+                  {errors.discountPrice.message}
+                </p>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <CustomDatePicker
+                label="Discount Start Date"
+                value={watch("discountStartDate") || ""}
+                onChange={(date) =>
+                  setValue("discountStartDate", date, { shouldValidate: true })
+                }
+              />
+
+              <CustomDatePicker
+                label="Discount End Date"
+                value={watch("discountEndDate") || ""}
+                onChange={(date) =>
+                  setValue("discountEndDate", date, { shouldValidate: true })
+                }
+              />
+            </div>
+          </div>
+        )}
+      </FormSection>
+
+      {/* 03 — Inventory & details */}
+      <FormSection
+        icon={Package}
+        iconClassName="bg-amber-500/10 text-amber-600"
+        title="Inventory & details"
+        // description="Stock levels and identifying information for this paper."
+      >
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mb-10">
+          <CustomInput
+            id="stock"
+            label="Stock"
+            type="number"
+            placeholder="0"
+            {...register("stock")}
+          />
+
+          <CustomInput
+            id="sortOrder"
+            label="Sort Order"
+            type="number"
+            placeholder="0"
+            {...register("sortOrder")}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <CustomInput
+            id="pageCount"
+            label="Page Count"
+            type="number"
+            placeholder="300"
+            {...register("pageCount")}
+          />
+
+          <CustomInput
+            id="isbn"
+            label="ISBN"
+            placeholder="978-..."
+            {...register("isbn")}
+          />
+        </div>
+      </FormSection>
+
+      {/* 04 — Media & visibility */}
+      <FormSection
+        icon={ImageIcon}
+        iconClassName="bg-violet-500/10 text-violet-600"
+        title="Media & visibility"
+        // description="Thumbnail, default selection, and publish status."
+      >
+        <CustomFileUpload
+          label="Paper Thumbnail"
+          accept="image/*"
+          buttonText="Choose image"
+          previewUrl={thumbnailPreview || paper?.thumbnail || null}
+          previewLabel={
+            thumbnailFile ? "New thumbnail preview" : "Current thumbnail"
+          }
+          onChange={handleThumbnailChange}
+          onClear={() => setThumbnailFile(null)}
+        />
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
+            <div className="space-y-0.5">
+              <Label htmlFor="isDefault">Default Paper</Label>
+              <p className="text-xs text-muted-foreground">
+                Only one paper per book can be default
+              </p>
+            </div>
+            <Switch
+              id="isDefault"
+              checked={watch("isDefault")}
+              onCheckedChange={(checked) => setValue("isDefault", checked)}
             />
           </div>
-        )}
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="flex items-center justify-between rounded-lg border border-border/60 p-4">
-          <div className="space-y-0.5">
-            <Label htmlFor="isDefault">Default Paper</Label>
-            <p className="text-xs text-muted-foreground">
-              Only one paper per book can be default
-            </p>
+          <div className="pt-6">
+            <SearchableDropdown
+              label="Status"
+              items={[
+                { id: "DRAFT", label: "Draft" },
+                { id: "PUBLISHED", label: "Published" },
+              ]}
+              value={watch("status")}
+              onChange={(item) => {
+                if (item) setValue("status", item.id as "DRAFT" | "PUBLISHED");
+              }}
+              placeholder="Select status"
+            />
           </div>
-          <Switch
-            id="isDefault"
-            checked={watch("isDefault")}
-            onCheckedChange={(checked) => setValue("isDefault", checked)}
-          />
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <SearchableDropdown
-            items={[
-              { id: "DRAFT", label: "Draft" },
-              { id: "PUBLISHED", label: "Published" },
-            ]}
-            value={watch("status")}
-            onChange={(item) => {
-              if (item) setValue("status", item.id as "DRAFT" | "PUBLISHED");
-            }}
-            placeholder="Select status"
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-2">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
-          {createMutation.isPending || updateMutation.isPending
-            ? "Saving..."
-            : isEditing
-            ? "Update Paper"
-            : "Create Paper"}
-        </Button>
-      </div>
+      </FormSection>
     </form>
   );
 }

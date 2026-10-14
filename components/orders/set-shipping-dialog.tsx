@@ -1,19 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomModal } from "@/components/ui/custom-modal";
 import { useUpdateOrderShipping } from "@/lib/hooks/use-orders";
-import { formatBDT } from "@/lib/utils";
-import { Truck, Loader2 } from "lucide-react";
 import type { Order } from "@/lib/types/book";
 
 interface SetShippingDialogProps {
@@ -24,14 +17,16 @@ interface SetShippingDialogProps {
 
 export function SetShippingDialog({ order, open, onOpenChange }: SetShippingDialogProps) {
   const [shippingInput, setShippingInput] = useState("");
+  const [wasOpen, setWasOpen] = useState(false);
   const updateShipping = useUpdateOrderShipping();
 
-  const handleOpen = (newOpen: boolean) => {
-    if (newOpen && order) {
+  // Prefill the input with the current delivery charge whenever the dialog opens.
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open && order) {
       setShippingInput(order.shipping ?? "0");
     }
-    onOpenChange(newOpen);
-  };
+  }
 
   const handleSetShipping = async () => {
     if (!order) return;
@@ -41,44 +36,41 @@ export function SetShippingDialog({ order, open, onOpenChange }: SetShippingDial
       return;
     }
     await updateShipping.mutateAsync({ id: order.id, shipping: value });
-    handleOpen(false);
+    onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Set Delivery Charge</DialogTitle>
-          <DialogDescription>
-            Enter the delivery charge for order {order?.orderNumber}. This will be added to the order total and included in the receipt.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <label htmlFor="shipping" className="text-sm font-medium">
-              Delivery Charge (BDT)
-            </label>
-            <Input
-              id="shipping"
-              type="number"
-              min="0"
-              step="0.01"
-              value={shippingInput}
-              onChange={(e) => setShippingInput(e.target.value)}
-              placeholder="0.00"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => handleOpen(false)}>
+    <CustomModal
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Set Delivery Charge"
+      description={`Enter the delivery charge for order ${order?.orderNumber}. This will be added to the order total and included in the receipt.`}
+      footer={
+        <>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
           <Button onClick={handleSetShipping} disabled={updateShipping.isPending}>
-            {updateShipping.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {updateShipping.isPending && (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            )}
             Save Delivery Charge
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+    >
+      <div className="max-w-xs pt-6">
+        <CustomInput
+          id="shipping"
+          label="Delivery Charge (BDT)"
+          type="number"
+          min="0"
+          step="0.01"
+          value={shippingInput}
+          onChange={(e) => setShippingInput(e.target.value)}
+          placeholder="0.00"
+        />
+      </div>
+    </CustomModal>
   );
 }
