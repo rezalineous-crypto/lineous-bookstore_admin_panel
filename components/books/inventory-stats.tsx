@@ -57,7 +57,7 @@ export function InventoryStats({ summary }: InventoryStatsProps) {
       {stats?.map((stat) => (
         <Card
           key={stat.label}
-          className="border-border/60 bg-card shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover"
+          className="border-border/60 bg-card shadow-card transition-all duration-300 hover:shadow-card-hover"
         >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">

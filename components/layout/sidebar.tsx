@@ -6,19 +6,17 @@ import { usePathname } from "next/navigation";
 import { navigation } from "@/config/navigation";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
-import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
-import { ChevronLeft, ChevronRight, User, LogOut } from "lucide-react";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "../ui/popover";
+import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/auth-context";
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
     const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY);
@@ -31,6 +29,11 @@ export function Sidebar() {
 
   const toggleSidebar = () => {
     setIsCollapsed((prev) => !prev);
+  };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/admin/auth/login");
   };
 
   if (pathname === "/admin/auth/login") {
@@ -78,7 +81,7 @@ export function Sidebar() {
                 className={cn(
                   "group flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200",
                   active
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-ring/20"
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-ring/20 font-semibold"
                     : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   isCollapsed && "justify-center px-2",
                 )}
@@ -97,45 +100,17 @@ export function Sidebar() {
           isCollapsed && "justify-center px-3",
         )}
       >
-        <Popover>
-          <PopoverTrigger asChild>
-            <button className="flex items-center gap-3 focus:outline-none">
-              <Avatar className="h-10 w-10 rounded-md cursor-pointer">
-                <AvatarFallback className="rounded-md bg-primary text-primary font-semibold">
-                  AU
-                </AvatarFallback>
-              </Avatar>
-              {!isCollapsed && (
-                <div className="text-left cursor-pointer">
-                  <p className="text-sm font-medium">Admin User</p>
-                  <p className="text-xs text-muted-foreground">admin@bookstore.com</p>
-                </div>
-              )}
-            </button>
-          </PopoverTrigger>
-          <PopoverContent
-            align="end"
-            sideOffset={8}
-            className="w-48 p-1.5 rounded-lg shadow-lg border-border/60"
-          >
-            <div className="flex flex-col gap-1">
-              <Link
-                href="/admin/profile"
-                className="flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                <User className="h-4 w-4" />
-                Profile
-              </Link>
-              <Link
-                href="/admin/auth/login"
-                className="flex items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-foreground hover:bg-muted transition-colors"
-              >
-                <LogOut className="h-4 w-4 text-red-600" />
-                Logout
-              </Link>
-            </div>
-          </PopoverContent>
-        </Popover>
+        <Button
+          variant="ghost"
+          onClick={handleLogout}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-muted border border-muted transition-colors",
+            isCollapsed && "justify-center px-2",
+          )}
+        >
+          <LogOut className="h-4 w-4 text-red-600" />
+          {!isCollapsed && "Logout"}
+        </Button>
       </div>
     </aside>
   );

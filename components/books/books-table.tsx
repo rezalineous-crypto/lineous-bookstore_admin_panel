@@ -118,7 +118,7 @@ export function BooksTable({ onView, onEdit, onDelete, onAddPaper }: BooksTableP
                   </div>
 
                   <div>
-                    <h4 className="font-medium">{book.title}</h4>
+                    <h4 className="font-medium font-sans">{book.title}</h4>
                     <p className="text-sm text-muted-foreground">
                       {book.slug}
                     </p>
