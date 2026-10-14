@@ -2,13 +2,20 @@
 
 import { useForm } from "react-hook-form";
 import { useState, useEffect, type ChangeEvent, type ReactNode } from "react";
+import {
+  Building2,
+  Image as ImageIcon,
+  Info,
+  Tags,
+  type LucideIcon,
+} from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
-import { cn } from "@/lib/utils";
+import { cn, slugify } from "@/lib/utils";
 import {
   useCreateBook,
   useUpdateBook,
@@ -56,30 +63,41 @@ const controlClassName =
   "h-11 rounded-lg border-border/80 bg-background px-3.5 text-sm shadow-sm";
 
 function FormSection({
-  step,
+  icon: Icon,
   title,
   description,
+  iconClassName,
   children,
 }: {
-  step: string;
+  icon: LucideIcon;
   title: string;
   description?: string;
+  iconClassName?: string;
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-5">
-      <div className="flex items-start gap-3 border-b border-border/70 pb-3">
-        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-muted-foreground">
-          {step}
+    <section className="rounded-xl border border-border/70 bg-background p-5 shadow-sm sm:p-6">
+      <div className="flex items-center gap-3 border-b border-border/70 pb-4">
+        <span
+          className={cn(
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+            iconClassName
+          )}
+        >
+          <Icon className="h-5 w-5" />
         </span>
         <div>
           <h3 className="text-base font-semibold tracking-tight text-foreground">
             {title}
           </h3>
-          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+          {description && (
+            <p className="mt-0.5 text-sm text-muted-foreground">
+              {description}
+            </p>
+          )}
         </div>
       </div>
-      {children}
+      <div className="space-y-5 pt-5">{children}</div>
     </section>
   );
 }
@@ -181,6 +199,14 @@ export function BookForm({
       categoryIds: book?.categoryIds || [],
     },
   });
+
+  // Auto-generate slug from title
+  const titleValue = watch("title");
+  useEffect(() => {
+    if (!isEditing) {
+      setValue("slug", slugify(titleValue), { shouldValidate: true });
+    }
+  }, [titleValue, isEditing, setValue]);
 
   const selectedPublicationId = watch("publicationId");
 
@@ -311,14 +337,11 @@ export function BookForm({
 
   return (
     <>
-      <form
-        id={formId}
-        onSubmit={handleSubmit(onSubmit)}
-        className="space-y-8"
-      >
+      <form id={formId} onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* 01 — Basic information */}
         <FormSection
-          step="01"
+          icon={Info}
+          iconClassName="bg-blue-500/10 text-blue-600"
           title="Basic information"
           // description="The essential details used to identify this book."
         >
@@ -341,11 +364,43 @@ export function BookForm({
               />
             </FormField>
           </div>
+          <FormField
+            label="Categories"
+            htmlFor="categoryIds"
+            description="Select one or more categories. Hidden categories are included."
+          >
+            <MultiSelectDropdown
+              items={categories.map((cat) => ({
+                id: cat.id,
+                label: cat.name,
+                subLabel: cat.isHidden ? "Hidden" : undefined,
+              }))}
+              value={watch("categoryIds") || []}
+              onChange={(items) => {
+                setValue(
+                  "categoryIds",
+                  items.map((i) => String(i.id))
+                );
+              }}
+              placeholder="Select categories"
+              buttonClassName={controlClassName}
+              renderItem={(item, isSelected) => (
+                <>
+                  <span className="flex-1">{item.label}</span>
+                  {item.subLabel && (
+                    <span className="text-xs text-slate-400 ml-2">
+                      {item.subLabel}
+                    </span>
+                  )}
+                </>
+              )}
+            />
+          </FormField>
 
           <FormField
             label="Short description"
             htmlFor="shortDescription"
-            description="A brief summary shown in listings and search results."
+            // description="A brief summary shown in listings and search results."
           >
             <Textarea
               id="shortDescription"
@@ -359,7 +414,7 @@ export function BookForm({
           <FormField
             label="Description"
             htmlFor="description"
-            description="The full description shown on the book detail page."
+            // description="The full description shown on the book detail page."
           >
             <Textarea
               id="description"
@@ -373,7 +428,8 @@ export function BookForm({
 
         {/* 02 — Publication details */}
         <FormSection
-          step="02"
+          icon={Building2}
+          iconClassName="bg-violet-500/10 text-violet-600"
           title="Publication details"
           // description="Where and when this book was published."
         >
@@ -462,9 +518,9 @@ export function BookForm({
 
         {/* 03 — Classification */}
         <FormSection
-          step="03"
+          icon={Tags}
+          iconClassName="bg-amber-500/10 text-amber-600"
           title="Classification"
-          // description="Control the visibility and categorization of this book."
         >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <FormField label="Status" htmlFor="status">
@@ -482,47 +538,14 @@ export function BookForm({
                 buttonClassName={controlClassName}
               />
             </FormField>
-
-            <FormField
-              label="Categories"
-              htmlFor="categoryIds"
-              description="Select one or more categories. Hidden categories are included."
-            >
-              <MultiSelectDropdown
-                items={categories.map((cat) => ({
-                  id: cat.id,
-                  label: cat.name,
-                  subLabel: cat.isHidden ? "Hidden" : undefined,
-                }))}
-                value={watch("categoryIds") || []}
-                onChange={(items) => {
-                  setValue(
-                    "categoryIds",
-                    items.map((i) => String(i.id))
-                  );
-                }}
-                placeholder="Select categories (optional)"
-                buttonClassName={controlClassName}
-                renderItem={(item, isSelected) => (
-                  <>
-                    <span className="flex-1">{item.label}</span>
-                    {item.subLabel && (
-                      <span className="text-xs text-slate-400 ml-2">
-                        {item.subLabel}
-                      </span>
-                    )}
-                  </>
-                )}
-              />
-            </FormField>
           </div>
         </FormSection>
 
         {/* 04 — Book cover */}
         <FormSection
-          step="04"
+          icon={ImageIcon}
+          iconClassName="bg-emerald-500/10 text-emerald-600"
           title="Book cover"
-          // description="Upload a thumbnail image to represent this book."
         >
           <FormField
             label="Thumbnail"
@@ -539,11 +562,15 @@ export function BookForm({
               <div className="mt-3 flex items-center gap-4">
                 <img
                   src={thumbnailPreview || book?.thumbnail}
-                  alt={thumbnailFile ? "Thumbnail preview" : "Current thumbnail"}
+                  alt={
+                    thumbnailFile ? "Thumbnail preview" : "Current thumbnail"
+                  }
                   className="h-32 w-24 rounded-lg border border-border/60 object-cover"
                 />
                 <p className="text-sm text-muted-foreground">
-                  {thumbnailFile ? "New thumbnail preview" : "Current thumbnail"}
+                  {thumbnailFile
+                    ? "New thumbnail preview"
+                    : "Current thumbnail"}
                 </p>
               </div>
             )}

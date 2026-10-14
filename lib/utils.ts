@@ -6,6 +6,19 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Convert an arbitrary string into a URL-friendly slug.
+ * e.g. "The Art of Programming!" -> "the-art-of-programming"
+ *
+ * This is the single, core slug generator used across all admin forms.
+ */
+export function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+/**
  * Format a monetary amount (backend returns Decimal serialized as string, e.g. "500.00")
  * as a BDT currency string: ৳500.00
  */

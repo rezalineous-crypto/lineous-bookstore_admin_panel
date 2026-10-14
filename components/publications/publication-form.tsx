@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,6 +19,7 @@ import type {
   BookStatus,
 } from "@/lib/types/book";
 import { BookStatus as BookStatusEnum } from "@/constants/status";
+import { slugify } from "@/lib/utils";
 
 type PublicationFormValues = {
   name: string;
@@ -50,6 +52,14 @@ export function PublicationForm({ publication, onSuccess, onCancel }: Publicatio
       isActive: publication?.isActive ?? true,
     },
   });
+
+  // Auto-generate slug from name
+  const nameValue = watch("name");
+  useEffect(() => {
+    if (!isEditing) {
+      setValue("slug", slugify(nameValue), { shouldValidate: true });
+    }
+  }, [nameValue, isEditing, setValue]);
 
   const onSubmit = async (data: PublicationFormValues) => {
     if (isEditing && publication) {

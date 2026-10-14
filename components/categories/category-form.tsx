@@ -14,6 +14,7 @@ import {
   useCategories,
 } from "@/lib/hooks/use-categories";
 import type { Category, CreateCategoryDto, UpdateCategoryDto } from "@/lib/types/book";
+import { slugify } from "@/lib/utils";
 
 type CategoryFormValues = {
   name: string;
@@ -56,12 +57,8 @@ export function CategoryForm({ category, onSuccess, onCancel }: CategoryFormProp
   // Auto-generate slug from name
   const nameValue = watch("name");
   useEffect(() => {
-    if (!isEditing && nameValue) {
-      const slug = nameValue
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      setValue("slug", slug, { shouldValidate: true });
+    if (!isEditing) {
+      setValue("slug", slugify(nameValue), { shouldValidate: true });
     }
   }, [nameValue, isEditing, setValue]);
 

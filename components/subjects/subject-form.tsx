@@ -1,6 +1,7 @@
 "use client";
 
 import { useForm } from "react-hook-form";
+import { useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import {
 } from "@/lib/hooks/use-subjects";
 import { usePublications } from "@/lib/hooks/use-publications";
 import type { Subject, UpdateSubjectDto } from "@/lib/types/book";
+import { slugify } from "@/lib/utils";
 
 type SubjectFormValues = {
   name: string;
@@ -45,6 +47,14 @@ export function SubjectForm({ subject, onSuccess, onCancel }: SubjectFormProps) 
       isActive: subject?.isActive ?? true,
     },
   });
+
+  // Auto-generate slug from name
+  const nameValue = watch("name");
+  useEffect(() => {
+    if (!isEditing) {
+      setValue("slug", slugify(nameValue), { shouldValidate: true });
+    }
+  }, [nameValue, isEditing, setValue]);
 
   const onSubmit = async (data: SubjectFormValues) => {
     if (isEditing && subject) {
