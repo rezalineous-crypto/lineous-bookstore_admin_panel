@@ -1,14 +1,14 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useState, useEffect, type ChangeEvent } from "react";
+import { useState, useEffect, type ChangeEvent, type ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
+import { cn } from "@/lib/utils";
 import {
   useCreateBook,
   useUpdateBook,
@@ -43,9 +43,80 @@ interface BookFormProps {
   book?: Book | null;
   onSuccess?: (bookId?: string) => void;
   onCancel?: () => void;
+  formId?: string;
+  onSubmittingChange?: (submitting: boolean) => void;
 }
 
-export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
+// Shared control styling so inputs, textareas, and dropdown triggers all
+// share the same height, radius, and border treatment.
+const inputClassName =
+  "h-11 rounded-lg border-border/80 bg-background px-3.5 text-sm shadow-sm transition-colors placeholder:text-muted-foreground/60 focus-visible:ring-2";
+
+const controlClassName =
+  "h-11 rounded-lg border-border/80 bg-background px-3.5 text-sm shadow-sm";
+
+function FormSection({
+  step,
+  title,
+  description,
+  children,
+}: {
+  step: string;
+  title: string;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-5">
+      <div className="flex items-start gap-3 border-b border-border/70 pb-3">
+        <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-muted-foreground">
+          {step}
+        </span>
+        <div>
+          <h3 className="text-base font-semibold tracking-tight text-foreground">
+            {title}
+          </h3>
+          <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function FormField({
+  label,
+  htmlFor,
+  required = false,
+  description,
+  children,
+}: {
+  label: string;
+  htmlFor?: string;
+  required?: boolean;
+  description?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
+        {label}
+        {required && <span className="ml-0.5 text-destructive">*</span>}
+      </Label>
+      {children}
+      {description && (
+        <p className="text-xs leading-5 text-muted-foreground">{description}</p>
+      )}
+    </div>
+  );
+}
+
+export function BookForm({
+  book,
+  onSuccess,
+  formId,
+  onSubmittingChange,
+}: BookFormProps) {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
   const [attachmentFiles, setAttachmentFiles] = useState<File[]>([]);
@@ -87,6 +158,13 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
 
   const createMutation = useCreateBook();
   const updateMutation = useUpdateBook();
+
+  const isSubmitting = createMutation.isPending || updateMutation.isPending;
+
+  // Report the mutation's pending state so the modal footer can reflect it.
+  useEffect(() => {
+    onSubmittingChange?.(isSubmitting);
+  }, [isSubmitting, onSubmittingChange]);
 
   const { register, handleSubmit, setValue, watch } = useForm<BookFormValues>({
     defaultValues: {
@@ -233,230 +311,244 @@ export function BookForm({ book, onSuccess, onCancel }: BookFormProps) {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title *</Label>
-            <Input
-              id="title"
-              {...register("title")}
-              placeholder="Enter book title"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="slug">Slug *</Label>
-            <Input
-              id="slug"
-              {...register("slug")}
-              placeholder="enter-book-slug"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="shortDescription">Short Description</Label>
-          <Textarea
-            id="shortDescription"
-            {...register("shortDescription")}
-            placeholder="Brief description of the book"
-            rows={2}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            {...register("description")}
-            placeholder="Full book description"
-            rows={4}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="publicationDate">Publication Date</Label>
-            <Input
-              id="publicationDate"
-              type="date"
-              {...register("publicationDate")}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="edition">Edition</Label>
-            <Input
-              id="edition"
-              {...register("edition")}
-              placeholder="1st Edition"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="language">Language</Label>
-            <Input
-              id="language"
-              {...register("language")}
-              placeholder="English"
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="publicationId">Publication *</Label>
-            <SearchableDropdown
-              items={publications.map((pub) => ({
-                id: pub.id,
-                label: pub.name,
-              }))}
-              value={watch("publicationId") || ""}
-              onChange={(item) => {
-                if (item) {
-                  setValue("publicationId", String(item.id));
-                  setValue("subjectId", "");
-                }
-              }}
-              placeholder="Select publication"
-              onAddNewClick={() => setIsPublicationDialogOpen(true)}
-              addNewLabel="Publication"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="subjectId">Subject *</Label>
-            <SearchableDropdown
-              items={filteredSubjects.map((subject) => ({
-                id: subject.id,
-                label: subject.name,
-              }))}
-              value={watch("subjectId") || ""}
-              onChange={(item) => {
-                if (item) setValue("subjectId", String(item.id));
-              }}
-              placeholder={
-                selectedPublicationId
-                  ? "Select subject"
-                  : "Select publication first"
-              }
-              disabled={!selectedPublicationId}
-              onAddNewClick={() => setIsSubjectDialogOpen(true)}
-              addNewLabel="Subject"
-            />
-            {!selectedPublicationId && (
-              <p className="text-xs text-muted-foreground">
-                Please select a publication first
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="status">Status</Label>
-          <SearchableDropdown
-            items={[
-              { id: "DRAFT", label: "Draft" },
-              { id: "PUBLISHED", label: "Published" },
-              { id: "ARCHIVED", label: "Archived" },
-            ]}
-            value={watch("status") || "DRAFT"}
-            onChange={(item) => {
-              if (item) setValue("status", item.id as BookStatus);
-            }}
-            placeholder="Select status"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="categoryIds">Categories</Label>
-          <MultiSelectDropdown
-            items={categories.map((cat) => ({
-              id: cat.id,
-              label: cat.name,
-              subLabel: cat.isHidden ? "Hidden" : undefined,
-            }))}
-            value={watch("categoryIds") || []}
-            onChange={(items) => {
-              setValue(
-                "categoryIds",
-                items.map((i) => String(i.id))
-              );
-            }}
-            placeholder="Select categories (optional)"
-            renderItem={(item, isSelected) => (
-              <>
-                <span className="flex-1">{item.label}</span>
-                {item.subLabel && (
-                  <span className="text-xs text-slate-400 ml-2">
-                    {item.subLabel}
-                  </span>
-                )}
-              </>
-            )}
-          />
-          <p className="text-xs text-muted-foreground">
-            Select one or more categories. Hidden categories are included.
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="thumbnail">Thumbnail (Book Cover)</Label>
-          <Input
-            id="thumbnail"
-            type="file"
-            accept="image/*"
-            onChange={handleThumbnailChange}
-          />
-          {(thumbnailPreview || (book?.thumbnail && !thumbnailFile)) && (
-            <div className="mt-2">
-              <p className="mb-1 text-sm text-muted-foreground">
-                {thumbnailFile
-                  ? "New Thumbnail Preview:"
-                  : "Current Thumbnail:"}
-              </p>
-              <img
-                src={thumbnailPreview || book?.thumbnail}
-                alt={thumbnailFile ? "Thumbnail preview" : "Current thumbnail"}
-                className="h-32 w-24 rounded-md object-cover"
+      <form
+        id={formId}
+        onSubmit={handleSubmit(onSubmit)}
+        className="space-y-8"
+      >
+        {/* 01 — Basic information */}
+        <FormSection
+          step="01"
+          title="Basic information"
+          // description="The essential details used to identify this book."
+        >
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <FormField label="Book title" htmlFor="title" required>
+              <Input
+                id="title"
+                {...register("title")}
+                placeholder="e.g. The Art of Programming"
+                className={inputClassName}
               />
-            </div>
-          )}
-        </div>
+            </FormField>
 
-        {/* <div className="space-y-2">
-        <Label htmlFor="attachments">Additional Attachments</Label>
-        <Input
-          id="attachments"
-          type="file"
-          accept="image/*"
-          multiple
-          onChange={handleAttachmentsChange}
-        />
-        {attachmentFiles.length > 0 && (
-          <p className="text-sm text-muted-foreground">
-            {attachmentFiles.length} file(s) selected
-          </p>
-        )}
-      </div> */}
+            <FormField label="Slug" htmlFor="slug" required>
+              <Input
+                id="slug"
+                {...register("slug")}
+                placeholder="enter-book-slug"
+                className={inputClassName}
+              />
+            </FormField>
+          </div>
 
-        <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-          )}
-          <Button
-            type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending}
+          <FormField
+            label="Short description"
+            htmlFor="shortDescription"
+            description="A brief summary shown in listings and search results."
           >
-            {createMutation.isPending || updateMutation.isPending
-              ? "Saving..."
-              : isEditing
-              ? "Update Book"
-              : "Create Book"}
-          </Button>
-        </div>
+            <Textarea
+              id="shortDescription"
+              {...register("shortDescription")}
+              placeholder="Brief description of the book"
+              rows={2}
+              className={cn(inputClassName, "h-auto py-2.5")}
+            />
+          </FormField>
+
+          <FormField
+            label="Description"
+            htmlFor="description"
+            description="The full description shown on the book detail page."
+          >
+            <Textarea
+              id="description"
+              {...register("description")}
+              placeholder="Full book description"
+              rows={4}
+              className={cn(inputClassName, "h-auto py-2.5")}
+            />
+          </FormField>
+        </FormSection>
+
+        {/* 02 — Publication details */}
+        <FormSection
+          step="02"
+          title="Publication details"
+          // description="Where and when this book was published."
+        >
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <FormField label="Publication" htmlFor="publicationId" required>
+              <SearchableDropdown
+                items={publications.map((pub) => ({
+                  id: pub.id,
+                  label: pub.name,
+                }))}
+                value={watch("publicationId") || ""}
+                onChange={(item) => {
+                  if (item) {
+                    setValue("publicationId", String(item.id));
+                    setValue("subjectId", "");
+                  }
+                }}
+                placeholder="Select publication"
+                buttonClassName={controlClassName}
+                onAddNewClick={() => setIsPublicationDialogOpen(true)}
+                addNewLabel="Publication"
+              />
+            </FormField>
+
+            <FormField
+              label="Subject"
+              htmlFor="subjectId"
+              required
+              description={
+                selectedPublicationId
+                  ? undefined
+                  : "Please select a publication first"
+              }
+            >
+              <SearchableDropdown
+                items={filteredSubjects.map((subject) => ({
+                  id: subject.id,
+                  label: subject.name,
+                }))}
+                value={watch("subjectId") || ""}
+                onChange={(item) => {
+                  if (item) setValue("subjectId", String(item.id));
+                }}
+                placeholder={
+                  selectedPublicationId
+                    ? "Select subject"
+                    : "Select publication first"
+                }
+                disabled={!selectedPublicationId}
+                buttonClassName={controlClassName}
+                onAddNewClick={() => setIsSubjectDialogOpen(true)}
+                addNewLabel="Subject"
+              />
+            </FormField>
+          </div>
+
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+            <FormField label="Edition" htmlFor="edition">
+              <Input
+                id="edition"
+                {...register("edition")}
+                placeholder="1st Edition"
+                className={inputClassName}
+              />
+            </FormField>
+
+            <FormField label="Language" htmlFor="language">
+              <Input
+                id="language"
+                {...register("language")}
+                placeholder="English"
+                className={inputClassName}
+              />
+            </FormField>
+
+            <FormField label="Publication date" htmlFor="publicationDate">
+              <Input
+                id="publicationDate"
+                type="date"
+                {...register("publicationDate")}
+                className={inputClassName}
+              />
+            </FormField>
+          </div>
+        </FormSection>
+
+        {/* 03 — Classification */}
+        <FormSection
+          step="03"
+          title="Classification"
+          // description="Control the visibility and categorization of this book."
+        >
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+            <FormField label="Status" htmlFor="status">
+              <SearchableDropdown
+                items={[
+                  { id: "DRAFT", label: "Draft" },
+                  { id: "PUBLISHED", label: "Published" },
+                  { id: "ARCHIVED", label: "Archived" },
+                ]}
+                value={watch("status") || "DRAFT"}
+                onChange={(item) => {
+                  if (item) setValue("status", item.id as BookStatus);
+                }}
+                placeholder="Select status"
+                buttonClassName={controlClassName}
+              />
+            </FormField>
+
+            <FormField
+              label="Categories"
+              htmlFor="categoryIds"
+              description="Select one or more categories. Hidden categories are included."
+            >
+              <MultiSelectDropdown
+                items={categories.map((cat) => ({
+                  id: cat.id,
+                  label: cat.name,
+                  subLabel: cat.isHidden ? "Hidden" : undefined,
+                }))}
+                value={watch("categoryIds") || []}
+                onChange={(items) => {
+                  setValue(
+                    "categoryIds",
+                    items.map((i) => String(i.id))
+                  );
+                }}
+                placeholder="Select categories (optional)"
+                buttonClassName={controlClassName}
+                renderItem={(item, isSelected) => (
+                  <>
+                    <span className="flex-1">{item.label}</span>
+                    {item.subLabel && (
+                      <span className="text-xs text-slate-400 ml-2">
+                        {item.subLabel}
+                      </span>
+                    )}
+                  </>
+                )}
+              />
+            </FormField>
+          </div>
+        </FormSection>
+
+        {/* 04 — Book cover */}
+        <FormSection
+          step="04"
+          title="Book cover"
+          // description="Upload a thumbnail image to represent this book."
+        >
+          <FormField
+            label="Thumbnail"
+            htmlFor="thumbnail"
+            description="Recommended size: 400×600px. PNG, JPG, or WEBP."
+          >
+            <Input
+              id="thumbnail"
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailChange}
+            />
+            {(thumbnailPreview || (book?.thumbnail && !thumbnailFile)) && (
+              <div className="mt-3 flex items-center gap-4">
+                <img
+                  src={thumbnailPreview || book?.thumbnail}
+                  alt={thumbnailFile ? "Thumbnail preview" : "Current thumbnail"}
+                  className="h-32 w-24 rounded-lg border border-border/60 object-cover"
+                />
+                <p className="text-sm text-muted-foreground">
+                  {thumbnailFile ? "New thumbnail preview" : "Current thumbnail"}
+                </p>
+              </div>
+            )}
+          </FormField>
+        </FormSection>
       </form>
       {renderInlineDialogs()}
     </>

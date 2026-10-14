@@ -1,65 +1,120 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
+import { Loader2, Plus, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { CustomModal } from "@/components/ui/custom-modal";
 import { BookForm } from "./book-form";
 import type { Book } from "@/lib/types/book";
 
 interface BookDialogProps {
   book?: Book | null;
-  trigger?: React.ReactNode;
+  trigger?: ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
   onSuccess?: () => void;
   onBookCreated?: (bookId: string) => void;
 }
 
-export function BookDialog({ book, trigger, open, onOpenChange, onSuccess, onBookCreated }: BookDialogProps) {
+export function BookDialog({
+  book,
+  trigger,
+  open,
+  onOpenChange,
+  onSuccess,
+  onBookCreated,
+}: BookDialogProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const isOpen = open ?? internalOpen;
   const setIsOpen = onOpenChange ?? setInternalOpen;
+  const isEditing = Boolean(book);
+
+  const formId = "book-form";
 
   const handleSuccess = (createdBookId?: string) => {
-    setIsSubmitting(false);
     setIsOpen(false);
+
     if (createdBookId && onBookCreated) {
       onBookCreated(createdBookId);
     }
+
     onSuccess?.();
   };
 
-  const handleCancel = () => {
-    setIsOpen(false);
+  // Render the trigger by injecting an onClick handler directly onto the
+  // provided element. This avoids wrapping it in an extra clickable node,
+  // which would create nested interactive elements and a11y issues.
+  const renderTrigger = () => {
+    if (!trigger) return null;
+
+    if (isValidElement(trigger)) {
+      return cloneElement(trigger as ReactElement<{ onClick?: () => void }>, {
+        onClick: () => setIsOpen(true),
+      });
+    }
+
+    return trigger;
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {book ? "Edit Book" : "Create New Book"}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      {renderTrigger()}
+
+      <CustomModal
+        open={isOpen}
+        onOpenChange={setIsOpen}
+        title={isEditing ? "Edit book" : "Create a book"}
+        description={
+          isEditing
+            ? "Update the book details and save your changes."
+            : "Add a new book to your inventory by completing the details below."
+        }
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsOpen(false)}
+              disabled={isSubmitting}
+              className="min-w-24"
+            >
+              <X className="h-4 w-4" />
+              Cancel
+            </Button>
+
+            <Button
+              type="submit"
+              form={formId}
+              disabled={isSubmitting}
+              className="min-w-36"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  {isEditing ? "Save changes" : "Create book"}
+                </>
+              )}
+            </Button>
+          </>
+        }
+      >
         <BookForm
+          key={book?.id ?? "new-book"}
           book={book}
-          onSuccess={(createdBookId) => {
-            setIsSubmitting(true);
-            handleSuccess(createdBookId);
-          }}
-          onCancel={handleCancel}
+          formId={formId}
+          onSubmittingChange={setIsSubmitting}
+          onSuccess={handleSuccess}
+          onCancel={() => setIsOpen(false)}
         />
-        {isSubmitting && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-4 rounded-2xl bg-white p-8 shadow-2xl">
-              <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              <p className="text-sm font-medium text-foreground">Creating book...</p>
-            </div>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+      </CustomModal>
+    </>
   );
 }

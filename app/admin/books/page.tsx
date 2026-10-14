@@ -68,20 +68,23 @@ export default function BooksPage() {
           </p>
         </div>
 
-        <BookDialog
-          open={isCreateDialogOpen}
-          onOpenChange={setIsCreateDialogOpen}
-          trigger={
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Add Book
-            </Button>
-          }
-          onBookCreated={(bookId) => {
-            router.push(`/admin/books/${bookId}`);
-          }}
-        />
+        <Button
+          className="gap-2"
+          onClick={() => setIsCreateDialogOpen(true)}
+        >
+          <Plus className="h-4 w-4" />
+          Add Book
+        </Button>
       </div>
+
+      {/* Create Dialog */}
+      <BookDialog
+        open={isCreateDialogOpen}
+        onOpenChange={setIsCreateDialogOpen}
+        onBookCreated={(bookId) => {
+          router.push(`/admin/books/${bookId}`);
+        }}
+      />
 
       {/* Inventory Stats */}
       {!inventoryLoading && inventoryData && (
