@@ -21,10 +21,7 @@ export default function MenuTreePage() {
           </p>
         </div>
 
-        <Button
-          className="gap-2"
-          onClick={() => router.push("/admin/books")}
-        >
+        <Button className="gap-2" onClick={() => router.push("/admin/books")}>
           <TreePine className="h-4 w-4" />
           Back to Books List
         </Button>
@@ -39,7 +36,9 @@ export default function MenuTreePage() {
       {error && (
         <div className="flex h-64 items-center justify-center">
           <p className="text-destructive">
-            {error instanceof Error ? error.message : "Failed to load tree data"}
+            {error instanceof Error
+              ? error.message
+              : "Failed to load tree data"}
           </p>
         </div>
       )}

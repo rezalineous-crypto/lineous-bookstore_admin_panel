@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { ChevronLeft, ChevronRight, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { CustomTooltip } from "../ui/custom-tooltip";
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 
@@ -75,20 +76,28 @@ export function Sidebar() {
             const Icon = item.icon;
 
             return (
-              <Link
+              <CustomTooltip
                 key={item.href}
-                href={item.href}
-                className={cn(
-                  "group flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200",
-                  active
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-ring/20 font-semibold"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                  isCollapsed && "justify-center px-2",
-                )}
+                content={item.title}
+                side="right"
+                disabled={!isCollapsed}
+                wrapperClassName="block w-full"
+                className="left-16"
               >
-                <Icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
-                {!isCollapsed && item.title}
-              </Link>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "group flex items-center gap-3 rounded-md px-4 py-3 text-sm font-medium transition-all duration-200",
+                    active
+                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-lg shadow-sidebar-ring/20 font-semibold"
+                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                    isCollapsed && "justify-center px-2",
+                  )}
+                >
+                  <Icon className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+                  {!isCollapsed && item.title}
+                </Link>
+              </CustomTooltip>
             );
           })}
         </div>
@@ -100,17 +109,24 @@ export function Sidebar() {
           isCollapsed && "justify-center px-3",
         )}
       >
-        <Button
-          variant="ghost"
-          onClick={handleLogout}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-muted border border-muted transition-colors",
-            isCollapsed && "justify-center px-2",
-          )}
+        <CustomTooltip
+          content="Logout"
+          side="right"
+          disabled={!isCollapsed}
+          wrapperClassName="block w-full"
         >
-          <LogOut className="h-4 w-4 text-red-600" />
-          {!isCollapsed && "Logout"}
-        </Button>
+          <Button
+            variant="ghost"
+            onClick={handleLogout}
+            className={cn(
+              "flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-sm font-medium text-muted border border-muted transition-colors",
+              isCollapsed && "justify-center px-2",
+            )}
+          >
+            <LogOut className="h-4 w-4 text-red-600" />
+            {!isCollapsed && "Logout"}
+          </Button>
+        </CustomTooltip>
       </div>
     </aside>
   );

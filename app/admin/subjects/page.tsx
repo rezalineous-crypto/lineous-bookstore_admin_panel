@@ -69,21 +69,6 @@ export default function SubjectsPage() {
         />
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search subjects..."
-            className="h-10 rounded-md border-border/60 bg-popover pl-10 pr-4"
-          />
-        </div>
-
-        <Button variant="outline" className="gap-2 rounded-md">
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </Button>
-      </div>
-
       <SubjectsTable onEdit={handleEdit} onDelete={handleDelete} />
 
       {/* Edit Dialog */}

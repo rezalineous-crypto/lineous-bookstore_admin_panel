@@ -69,19 +69,19 @@ export function SubjectsTable({ onEdit, onDelete }: SubjectsTableProps) {
              <th className="px-6 py-4 font-semibold text-gray-500">
               Slug
             </th>
-             <th className="px-6 py-4 font-semibold text-gray-500">
+             {/* <th className="px-6 py-4 font-semibold text-gray-500">
               Publication
             </th>
              <th className="px-6 py-4 font-semibold text-gray-500">
               Description
-            </th>
+            </th> */}
              <th className="px-6 py-4 font-semibold text-gray-500">
               Active
             </th>
              <th className="px-6 py-4 font-semibold text-gray-500">
               Created At
             </th>
-             <th className="px-6 py-4 font-semibold text-gray-500"></th>
+             <th className="px-6 py-4 font-semibold text-gray-500">Actions</th>
           </tr>
         </thead>
 
@@ -101,13 +101,13 @@ export function SubjectsTable({ onEdit, onDelete }: SubjectsTableProps) {
                 {subject.slug}
               </td>
 
-              <td className="px-6 py-4 text-sm text-muted-foreground">
+              {/* <td className="px-6 py-4 text-sm text-muted-foreground">
                 {subject.publicationId || "-"}
-              </td>
+              </td> */}
 
-              <td className="px-6 py-4 text-sm text-muted-foreground">
+              {/* <td className="px-6 py-4 text-sm text-muted-foreground">
                 {subject.description || "-"}
-              </td>
+              </td> */}
 
               <td className="px-6 py-4">
                 <button

@@ -81,41 +81,6 @@ export default function UsersPage() {
         <CustomerStats summary={customerData.summary} />
       )}
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search users..."
-            className="h-10 rounded-md border-border/60 bg-popover pl-10 pr-4"
-          />
-        </div>
-
-        <SearchableDropdown
-          items={[{ id: "all", label: "All Roles" }, ...UserRoleEnum.map((role) => ({ id: role, label: role }))]}
-          value={roleFilter}
-          onChange={(item) => {
-            if (item) setRoleFilter(item.id as string);
-          }}
-          placeholder="Filter by role"
-          buttonClassName="w-[150px] h-10"
-        />
-
-        <SearchableDropdown
-          items={[{ id: "all", label: "All Statuses" }, ...UserStatusEnum.map((status) => ({ id: status, label: status.charAt(0) + status.slice(1).toLowerCase() }))]}
-          value={statusFilter}
-          onChange={(item) => {
-            if (item) setStatusFilter(item.id as string);
-          }}
-          placeholder="Filter by status"
-          buttonClassName="w-[150px] h-10"
-        />
-
-        <Button variant="outline" className="gap-2 rounded-md">
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </Button>
-      </div>
-
       <UsersTable onEdit={handleEdit} onDelete={handleDelete} />
 
       {/* Top Customers */}

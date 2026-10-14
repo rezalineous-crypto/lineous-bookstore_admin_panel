@@ -88,21 +88,6 @@ export default function CategoriesPage() {
       {/* Category Stats */}
       <CategoryStats categories={categories} />
 
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search categories..."
-            className="h-10 rounded-md border-border/60 bg-popover pl-10 pr-4"
-          />
-        </div>
-
-        <Button variant="outline" className="gap-2 rounded-md">
-          <SlidersHorizontal className="h-4 w-4" />
-          Filters
-        </Button>
-      </div>
-
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Categories Table - 3 columns */}
         <div className="lg:col-span-4 space-y-6">

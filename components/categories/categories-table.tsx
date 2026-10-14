@@ -200,9 +200,9 @@ export function CategoriesTable({ onView, onEdit, onDelete }: CategoriesTablePro
               <span className="ml-2 text-sm font-medium">{category.displayOrder}</span>
             )}
           </td>
-          <td className="px-6 py-4 text-sm text-muted-foreground font-mono">
+          {/* <td className="px-6 py-4 text-sm text-muted-foreground font-mono">
             {category.icon || "—"}
-          </td>
+          </td> */}
           <td className="px-6 py-4 text-sm text-muted-foreground font-mono">
             {category.route || "—"}
           </td>
@@ -318,7 +318,7 @@ export function CategoriesTable({ onView, onEdit, onDelete }: CategoriesTablePro
               <th className="px-6 py-4 font-semibold text-gray-500">Parent</th>
               <th className="px-6 py-4 font-semibold text-gray-500">Hidden</th>
               <th className="px-6 py-4 font-semibold text-gray-500">Display Order</th>
-              <th className="px-6 py-4 font-semibold text-gray-500">Icon</th>
+              {/* <th className="px-6 py-4 font-semibold text-gray-500">Icon</th> */}
               <th className="px-6 py-4 font-semibold text-gray-500">Route</th>
               <th className="px-6 py-4 font-semibold text-gray-500">Books Count</th>
               <th className="px-6 py-4 font-semibold text-gray-500">Actions</th>
