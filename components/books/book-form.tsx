@@ -13,6 +13,7 @@ import {
 import { CustomInput } from "@/components/ui/custom-input";
 import { CustomTextarea } from "@/components/ui/custom-text-area";
 import { CustomFileUpload } from "@/components/ui/custom-file-upload";
+import { CustomDatePicker } from "@/components/ui/custom-date-picker";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { cn, slugify } from "@/lib/utils";
@@ -370,7 +371,7 @@ export function BookForm({
           title="Publication details"
           // description="Where and when this book was published."
         >
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 mb-10">
             <SearchableDropdown
               label="Publication"
               required
@@ -419,7 +420,7 @@ export function BookForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <CustomInput
               id="edition"
               label="Edition"
@@ -427,18 +428,12 @@ export function BookForm({
               {...register("edition")}
             />
 
-            <CustomInput
-              id="language"
-              label="Language"
-              placeholder="English"
-              {...register("language")}
-            />
-
-            <CustomInput
-              id="publicationDate"
+            <CustomDatePicker
               label="Publication date"
-              type="date"
-              {...register("publicationDate")}
+              value={watch("publicationDate") || ""}
+              onChange={(date) =>
+                setValue("publicationDate", date, { shouldValidate: true })
+              }
             />
           </div>
         </FormSection>
@@ -462,6 +457,13 @@ export function BookForm({
                 if (item) setValue("status", item.id as BookStatus);
               }}
               placeholder="Select status"
+            />
+
+            <CustomInput
+              id="language"
+              label="Language"
+              placeholder="English"
+              {...register("language")}
             />
           </div>
         </FormSection>

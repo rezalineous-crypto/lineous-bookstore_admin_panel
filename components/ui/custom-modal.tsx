@@ -86,14 +86,14 @@ export function CustomModal({
             type="button"
             aria-label="Close modal"
             onClick={() => onOpenChange(false)}
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer hover:text-red-500"
           >
             <X className="h-5 w-5" />
           </button>
         </header>
 
         {/* The only scrollable area */}
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-6 sm:py-7 sm:px-7">
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 sm:py-7 md:py-0 sm:px-7">
           {children}
         </div>
 

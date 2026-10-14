@@ -92,7 +92,7 @@ export function CustomFileUpload({
 
           <span
             className={cn(
-              "flex-1 truncate text-sm",
+              "flex-1 truncate text-sm lg:ml-5",
               fileName ? "text-slate-900" : "text-slate-400",
               label && !isFloating && "invisible"
             )}
