@@ -10,9 +10,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { CustomInput } from "@/components/ui/custom-input";
+import { CustomTextarea } from "@/components/ui/custom-text-area";
+import { CustomFileUpload } from "@/components/ui/custom-file-upload";
 import { SearchableDropdown } from "@/components/ui/searchable-dropdown";
 import { MultiSelectDropdown } from "@/components/ui/multi-select-dropdown";
 import { cn, slugify } from "@/lib/utils";
@@ -54,14 +54,6 @@ interface BookFormProps {
   onSubmittingChange?: (submitting: boolean) => void;
 }
 
-// Shared control styling so inputs, textareas, and dropdown triggers all
-// share the same height, radius, and border treatment.
-const inputClassName =
-  "h-11 rounded-lg border-border/80 bg-background px-3.5 text-sm shadow-sm transition-colors placeholder:text-muted-foreground/60 focus-visible:ring-2";
-
-const controlClassName =
-  "h-11 rounded-lg border-border/80 bg-background px-3.5 text-sm shadow-sm";
-
 function FormSection({
   icon: Icon,
   title,
@@ -76,8 +68,8 @@ function FormSection({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-xl border border-border/70 bg-background p-5 shadow-sm sm:p-6">
-      <div className="flex items-center gap-3 border-b border-border/70 pb-4">
+    <section className="rounded-xl border border-border/70 bg-white p-5 shadow-sm sm:p-6">
+      <div className="flex items-center gap-3 border-b border-border/70 pb-8">
         <span
           className={cn(
             "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
@@ -99,33 +91,6 @@ function FormSection({
       </div>
       <div className="space-y-5 pt-5">{children}</div>
     </section>
-  );
-}
-
-function FormField({
-  label,
-  htmlFor,
-  required = false,
-  description,
-  children,
-}: {
-  label: string;
-  htmlFor?: string;
-  required?: boolean;
-  description?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={htmlFor} className="text-sm font-medium text-foreground">
-        {label}
-        {required && <span className="ml-0.5 text-destructive">*</span>}
-      </Label>
-      {children}
-      {description && (
-        <p className="text-xs leading-5 text-muted-foreground">{description}</p>
-      )}
-    </div>
   );
 }
 
@@ -346,84 +311,56 @@ export function BookForm({
           // description="The essential details used to identify this book."
         >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <FormField label="Book title" htmlFor="title" required>
-              <Input
-                id="title"
-                {...register("title")}
-                placeholder="e.g. The Art of Programming"
-                className={inputClassName}
-              />
-            </FormField>
+            <CustomInput
+              id="title"
+              label="Book title"
+              placeholder="e.g. The Art of Programming"
+              {...register("title")}
+              required
+            />
 
-            <FormField label="Slug" htmlFor="slug" required>
-              <Input
-                id="slug"
-                {...register("slug")}
-                placeholder="enter-book-slug"
-                className={inputClassName}
-              />
-            </FormField>
+            <CustomInput
+              id="slug"
+              label="Slug"
+              placeholder="enter-book-slug"
+              {...register("slug")}
+              required
+            />
           </div>
-          <FormField
+
+          <MultiSelectDropdown
             label="Categories"
-            htmlFor="categoryIds"
-            description="Select one or more categories. Hidden categories are included."
-          >
-            <MultiSelectDropdown
-              items={categories.map((cat) => ({
-                id: cat.id,
-                label: cat.name,
-                subLabel: cat.isHidden ? "Hidden" : undefined,
-              }))}
-              value={watch("categoryIds") || []}
-              onChange={(items) => {
-                setValue(
-                  "categoryIds",
-                  items.map((i) => String(i.id))
-                );
-              }}
-              placeholder="Select categories"
-              buttonClassName={controlClassName}
-              renderItem={(item, isSelected) => (
-                <>
-                  <span className="flex-1">{item.label}</span>
-                  {item.subLabel && (
-                    <span className="text-xs text-slate-400 ml-2">
-                      {item.subLabel}
-                    </span>
-                  )}
-                </>
-              )}
-            />
-          </FormField>
+            items={categories.map((cat) => ({
+              id: cat.id,
+              label: cat.name,
+              subLabel: cat.isHidden ? "Hidden" : undefined,
+            }))}
+            value={watch("categoryIds") || []}
+            onChange={(items) => {
+              setValue(
+                "categoryIds",
+                items.map((item) => String(item.id))
+              );
+            }}
+            placeholder="Select categories"
+            searchPlaceholder="Search categories..."
+            required
+            className="mt-10"
+          />
 
-          <FormField
+          <CustomTextarea
+            id="shortDescription"
             label="Short description"
-            htmlFor="shortDescription"
-            // description="A brief summary shown in listings and search results."
-          >
-            <Textarea
-              id="shortDescription"
-              {...register("shortDescription")}
-              placeholder="Brief description of the book"
-              rows={2}
-              className={cn(inputClassName, "h-auto py-2.5")}
-            />
-          </FormField>
+            placeholder="Brief description of the book"
+            {...register("shortDescription")}
+          />
 
-          <FormField
+          <CustomTextarea
+            id="description"
             label="Description"
-            htmlFor="description"
-            // description="The full description shown on the book detail page."
-          >
-            <Textarea
-              id="description"
-              {...register("description")}
-              placeholder="Full book description"
-              rows={4}
-              className={cn(inputClassName, "h-auto py-2.5")}
-            />
-          </FormField>
+            placeholder="Full book description"
+            {...register("description")}
+          />
         </FormSection>
 
         {/* 02 — Publication details */}
@@ -434,37 +371,29 @@ export function BookForm({
           // description="Where and when this book was published."
         >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <FormField label="Publication" htmlFor="publicationId" required>
-              <SearchableDropdown
-                items={publications.map((pub) => ({
-                  id: pub.id,
-                  label: pub.name,
-                }))}
-                value={watch("publicationId") || ""}
-                onChange={(item) => {
-                  if (item) {
-                    setValue("publicationId", String(item.id));
-                    setValue("subjectId", "");
-                  }
-                }}
-                placeholder="Select publication"
-                buttonClassName={controlClassName}
-                onAddNewClick={() => setIsPublicationDialogOpen(true)}
-                addNewLabel="Publication"
-              />
-            </FormField>
-
-            <FormField
-              label="Subject"
-              htmlFor="subjectId"
+            <SearchableDropdown
+              label="Publication"
               required
-              description={
-                selectedPublicationId
-                  ? undefined
-                  : "Please select a publication first"
-              }
-            >
+              items={publications.map((pub) => ({
+                id: pub.id,
+                label: pub.name,
+              }))}
+              value={watch("publicationId") || ""}
+              onChange={(item) => {
+                if (item) {
+                  setValue("publicationId", String(item.id));
+                  setValue("subjectId", "");
+                }
+              }}
+              placeholder="Select publication"
+              onAddNewClick={() => setIsPublicationDialogOpen(true)}
+              addNewLabel="Publication"
+            />
+
+            <div className="space-y-2">
               <SearchableDropdown
+                label="Subject"
+                required
                 items={filteredSubjects.map((subject) => ({
                   id: subject.id,
                   label: subject.name,
@@ -479,40 +408,38 @@ export function BookForm({
                     : "Select publication first"
                 }
                 disabled={!selectedPublicationId}
-                buttonClassName={controlClassName}
                 onAddNewClick={() => setIsSubjectDialogOpen(true)}
                 addNewLabel="Subject"
               />
-            </FormField>
+              {!selectedPublicationId && (
+                <p className="text-xs text-muted-foreground">
+                  Please select a publication first
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            <FormField label="Edition" htmlFor="edition">
-              <Input
-                id="edition"
-                {...register("edition")}
-                placeholder="1st Edition"
-                className={inputClassName}
-              />
-            </FormField>
+            <CustomInput
+              id="edition"
+              label="Edition"
+              placeholder="1st Edition"
+              {...register("edition")}
+            />
 
-            <FormField label="Language" htmlFor="language">
-              <Input
-                id="language"
-                {...register("language")}
-                placeholder="English"
-                className={inputClassName}
-              />
-            </FormField>
+            <CustomInput
+              id="language"
+              label="Language"
+              placeholder="English"
+              {...register("language")}
+            />
 
-            <FormField label="Publication date" htmlFor="publicationDate">
-              <Input
-                id="publicationDate"
-                type="date"
-                {...register("publicationDate")}
-                className={inputClassName}
-              />
-            </FormField>
+            <CustomInput
+              id="publicationDate"
+              label="Publication date"
+              type="date"
+              {...register("publicationDate")}
+            />
           </div>
         </FormSection>
 
@@ -523,21 +450,19 @@ export function BookForm({
           title="Classification"
         >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-            <FormField label="Status" htmlFor="status">
-              <SearchableDropdown
-                items={[
-                  { id: "DRAFT", label: "Draft" },
-                  { id: "PUBLISHED", label: "Published" },
-                  { id: "ARCHIVED", label: "Archived" },
-                ]}
-                value={watch("status") || "DRAFT"}
-                onChange={(item) => {
-                  if (item) setValue("status", item.id as BookStatus);
-                }}
-                placeholder="Select status"
-                buttonClassName={controlClassName}
-              />
-            </FormField>
+            <SearchableDropdown
+              label="Status"
+              items={[
+                { id: "DRAFT", label: "Draft" },
+                { id: "PUBLISHED", label: "Published" },
+                { id: "ARCHIVED", label: "Archived" },
+              ]}
+              value={watch("status") || "DRAFT"}
+              onChange={(item) => {
+                if (item) setValue("status", item.id as BookStatus);
+              }}
+              placeholder="Select status"
+            />
           </div>
         </FormSection>
 
@@ -547,34 +472,18 @@ export function BookForm({
           iconClassName="bg-emerald-500/10 text-emerald-600"
           title="Book cover"
         >
-          <FormField
+          <CustomFileUpload
             label="Thumbnail"
-            htmlFor="thumbnail"
+            accept="image/*"
+            buttonText="Choose image"
             description="Recommended size: 400×600px. PNG, JPG, or WEBP."
-          >
-            <Input
-              id="thumbnail"
-              type="file"
-              accept="image/*"
-              onChange={handleThumbnailChange}
-            />
-            {(thumbnailPreview || (book?.thumbnail && !thumbnailFile)) && (
-              <div className="mt-3 flex items-center gap-4">
-                <img
-                  src={thumbnailPreview || book?.thumbnail}
-                  alt={
-                    thumbnailFile ? "Thumbnail preview" : "Current thumbnail"
-                  }
-                  className="h-32 w-24 rounded-lg border border-border/60 object-cover"
-                />
-                <p className="text-sm text-muted-foreground">
-                  {thumbnailFile
-                    ? "New thumbnail preview"
-                    : "Current thumbnail"}
-                </p>
-              </div>
-            )}
-          </FormField>
+            previewUrl={thumbnailPreview || book?.thumbnail || null}
+            previewLabel={
+              thumbnailFile ? "New thumbnail preview" : "Current thumbnail"
+            }
+            onChange={handleThumbnailChange}
+            onClear={() => setThumbnailFile(null)}
+          />
         </FormSection>
       </form>
       {renderInlineDialogs()}

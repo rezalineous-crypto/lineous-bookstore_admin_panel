@@ -8,30 +8,30 @@ type InputProps = React.ComponentPropsWithoutRef<"input"> & {
 };
 
 const baseInputStyle =
-  "peer block h-14 w-full rounded-xl border border-slate-200 " +
-  "bg-white px-4 pt-5 pb-2 text-sm text-slate-900 " +
+  "peer block h-12 w-full rounded-lg border border-slate-300 " +
+  "bg-gray-50 px-4 text-sm text-slate-900 " +
   "outline-none transition-all duration-200 ease-out " +
-  "placeholder:text-transparent focus:border-indigo-500 " +
-  "focus:ring-4 focus:ring-indigo-500/10 " +
+  "placeholder:text-transparent focus:border-gray-500 " +
+  "focus:ring-4 focus:ring-gray-500/10 " +
   "disabled:cursor-not-allowed disabled:bg-slate-50 " +
   "disabled:text-slate-400 " +
   "aria-invalid:border-red-500 aria-invalid:ring-4 " +
   "aria-invalid:ring-red-500/10 " +
   "dark:border-slate-700 dark:bg-slate-900 " +
-  "dark:text-slate-100 dark:focus:border-indigo-400 " +
+  "dark:text-slate-100 dark:focus:border-gray-400 " +
   "dark:disabled:bg-slate-800";
 
 const floatingLabelStyle =
   "pointer-events-none absolute left-4 top-1/2 " +
-  "-translate-y-1/2 origin-left text-sm text-slate-500 " +
+  "-translate-y-1/2 origin-left text-sm text-slate-500" +
   "transition-all duration-200 ease-out " +
-  "peer-focus:top-2.5 peer-focus:translate-y-0 " +
-  "peer-focus:scale-90 peer-focus:text-indigo-600 " +
-  "peer-[:not(:placeholder-shown)]:top-2.5 " +
+  "peer-focus:-top-6 peer-focus:left-1 peer-focus:translate-y-0 " +
+  "peer-focus:scale-90 peer-focus:text-gray-600 peer-focus:font-bold " +
+  "peer-[:not(:placeholder-shown)]:-top-6 " +
   "peer-[:not(:placeholder-shown)]:translate-y-0 " +
   "peer-[:not(:placeholder-shown)]:scale-90 " +
-  "peer-[:not(:placeholder-shown)]:text-slate-500 " +
-  "dark:text-slate-400 dark:peer-focus:text-indigo-400";
+  "peer-[:not(:placeholder-shown)]:text-gray-600 peer-[:not(:placeholder-shown)]:font-bold " +
+  "dark:text-slate-400 dark:peer-focus:text-gray-400";
 
 function CustomInput({
   id,
@@ -56,7 +56,7 @@ function CustomInput({
           "h-11 w-full min-w-0 rounded-xl border border-slate-200 " +
           "bg-white px-3.5 text-sm text-slate-900 outline-none " +
           "transition-all duration-200 placeholder:text-slate-400 " +
-          "focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 " +
+          "focus:border-gray-500 focus:ring-4 focus:ring-gray-500/10 " +
           "disabled:cursor-not-allowed disabled:opacity-50 " +
           "aria-invalid:border-red-500 " +
           "dark:border-slate-700 dark:bg-slate-900 " +
@@ -99,9 +99,9 @@ function CustomInput({
           type={type}
           placeholder={placeholder}
           className={
-            "h-11 w-full rounded-xl border border-slate-200 " +
+            "h-11 w-full rounded-lg border border-slate-800 " +
             "bg-white px-3.5 text-sm outline-none transition-all " +
-            "focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 " +
+            "focus:border-gray-500 focus:ring-4 focus:ring-gray-500/10 " +
             "dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 " +
             className
           }
