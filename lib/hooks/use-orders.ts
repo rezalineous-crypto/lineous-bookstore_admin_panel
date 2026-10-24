@@ -7,16 +7,17 @@ import { ordersApi } from "@/lib/api/orders";
 import { QueryKeys } from "@/constants/query-key";
 import type { CreateOrderDto, UpdateOrderStatusDto, UpdateOrderShippingDto } from "@/lib/types/book";
 
-// Hook to fetch all orders
-export function useOrders(categoryId?: string) {
+// Hook to fetch orders (paginated)
+export function useOrders(params?: { page?: number; limit?: number; categoryId?: string }) {
   return useQuery({
-    queryKey: categoryId ? [...QueryKeys.orders, "category", categoryId] : QueryKeys.orders,
+    queryKey: [...QueryKeys.orders, params ?? {}],
     queryFn: async () => {
-      const response = await ordersApi.getOrders(categoryId);
-      return response.data;
+      const response = await ordersApi.getOrders(params);
+      return response;
     },
     staleTime: 5 * 60 * 1000,
     retry: 1,
+    placeholderData: (prev) => prev,
   });
 }
 
@@ -88,6 +89,48 @@ export function useUpdateOrderShipping() {
       queryClient.invalidateQueries({ queryKey: [...QueryKeys.orders, variables.id] });
       queryClient.invalidateQueries({ queryKey: QueryKeys.receiptDetails(variables.id) });
       toast.success(response.message || "Delivery charge updated successfully");
+    },
+    onError: (error: unknown) => {
+      const errorMessage = getErrorMessage(error);
+      toast.error(errorMessage);
+    },
+  });
+}
+
+// Hook to cancel an order (admin or owner)
+export function useCancelOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await ordersApi.cancelOrder(id);
+      return response;
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.orders });
+      queryClient.invalidateQueries({ queryKey: [...QueryKeys.orders, variables] });
+      toast.success("Order cancelled successfully");
+    },
+    onError: (error: unknown) => {
+      const errorMessage = getErrorMessage(error);
+      toast.error(errorMessage);
+    },
+  });
+}
+
+// Hook to request return for an order (admin or owner)
+export function useReturnOrder() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await ordersApi.returnOrder(id);
+      return response;
+    },
+    onSuccess: (_response, variables) => {
+      queryClient.invalidateQueries({ queryKey: QueryKeys.orders });
+      queryClient.invalidateQueries({ queryKey: [...QueryKeys.orders, variables] });
+      toast.success("Return requested successfully");
     },
     onError: (error: unknown) => {
       const errorMessage = getErrorMessage(error);

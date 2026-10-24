@@ -29,7 +29,8 @@ export default function ReviewsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
 
-  const { data: books = [] } = useBooks();
+  const { data: booksData } = useBooks();
+  const books = booksData?.data ?? [];
   const deleteMutation = useDeleteReview();
 
   const handleEdit = (review: Review) => {

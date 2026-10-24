@@ -9,12 +9,16 @@ import type {
   ReceiptVerification,
   GenerateReceiptResponse,
   OrderStatusStatsResponse,
+  PaginatedResponse,
 } from "@/lib/types/book";
 
-// Get all orders
-export const getOrders = async (categoryId?: string): Promise<ApiResponse<Order[]>> => {
-  const params = categoryId ? { categoryId } : {};
-  const response = await apiClient.get<ApiResponse<Order[]>>("/orders", { params });
+// Get all orders (paginated)
+export const getOrders = async (params?: {
+  page?: number;
+  limit?: number;
+  categoryId?: string;
+}): Promise<PaginatedResponse<Order>> => {
+  const response = await apiClient.get<PaginatedResponse<Order>>("/orders", { params });
   return response.data;
 };
 
@@ -39,6 +43,18 @@ export const updateOrderStatus = async (id: string, dto: UpdateOrderStatusDto): 
 // Update order shipping (delivery charge)
 export const updateOrderShipping = async (id: string, shipping: number): Promise<ApiResponse<Order>> => {
   const response = await apiClient.patch<ApiResponse<Order>>(`/orders/${id}/shipping`, { shipping });
+  return response.data;
+};
+
+// Cancel an order (admin or owner)
+export const cancelOrder = async (id: string): Promise<ApiResponse<Order>> => {
+  const response = await apiClient.post<ApiResponse<Order>>(`/orders/${id}/cancel`);
+  return response.data;
+};
+
+// Request return for an order (admin or owner)
+export const returnOrder = async (id: string): Promise<ApiResponse<Order>> => {
+  const response = await apiClient.post<ApiResponse<Order>>(`/orders/${id}/return`);
   return response.data;
 };
 
@@ -82,6 +98,8 @@ export const ordersApi = {
   createOrder,
   updateOrderStatus,
   updateOrderShipping,
+  cancelOrder,
+  returnOrder,
   generateReceipt,
   getReceiptDetails,
   downloadReceipt,

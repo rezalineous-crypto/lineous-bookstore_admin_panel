@@ -10,11 +10,16 @@ import type {
   CreateBookPaperDto,
   UpdateBookPaperDto,
   BookTreeCategory,
+  PaginatedResponse,
 } from "@/lib/types/book";
 
-// Get all books
-export const getBooks = async (): Promise<ApiResponse<Book[]>> => {
-  const response = await apiClient.get<ApiResponse<Book[]>>("/books");
+// Get all books (paginated)
+export const getBooks = async (params?: {
+  page?: number;
+  limit?: number;
+  q?: string;
+}): Promise<PaginatedResponse<Book>> => {
+  const response = await apiClient.get<PaginatedResponse<Book>>("/books", { params });
   return response.data;
 };
 

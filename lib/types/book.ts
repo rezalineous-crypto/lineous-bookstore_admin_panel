@@ -483,13 +483,18 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface PaginatedMeta {
+  page: number;
+  limit: number;
+  total: number;
+  pages: number;
+}
+
 export interface PaginatedResponse<T> {
   message: string;
   status: string;
   data: T[];
-  total?: number;
-  page?: number;
-  limit?: number;
+  meta: PaginatedMeta;
 }
 
 // Tree structure types (new: Category → Publication → Subject → Books)

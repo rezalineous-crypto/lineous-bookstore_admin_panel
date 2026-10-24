@@ -13,16 +13,17 @@ import type {
   UpdateBookPaperDto,
 } from "@/lib/types/book";
 
-// Hook to fetch all books
-export function useBooks() {
+// Hook to fetch books (paginated)
+export function useBooks(params?: { page?: number; limit?: number; q?: string }) {
   return useQuery({
-    queryKey: QueryKeys.books,
+    queryKey: [...QueryKeys.books, params ?? {}],
     queryFn: async () => {
-      const response = await booksApi.getBooks();
-      return response.data;
+      const response = await booksApi.getBooks(params);
+      return response;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: 1,
+    placeholderData: (prev) => prev,
   });
 }
 

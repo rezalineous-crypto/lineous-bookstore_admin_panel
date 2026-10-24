@@ -12,6 +12,23 @@ import { Button } from "@/components/ui/button";
 import { SetShippingDialog } from "./set-shipping-dialog";
 import { getNextOrderStatuses, OrderStatusLabels } from "@/constants/status";
 import { formatBDT } from "@/lib/utils";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const PAGE_SIZES = [20, 50, 100];
 
 interface OrdersTableProps {
   onView?: (order: Order) => void;
@@ -20,7 +37,15 @@ interface OrdersTableProps {
 export function OrdersTable({ onView }: OrdersTableProps) {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const { data: orders, isLoading, error } = useOrders(categoryFilter === "all" ? undefined : categoryFilter);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const { data, isLoading, error } = useOrders({
+    page,
+    limit,
+    categoryId: categoryFilter === "all" ? undefined : categoryFilter,
+  });
+  const orders = data?.data;
+  const meta = data?.meta;
   const updateStatusMutation = useUpdateOrderStatus();
   const downloadReceipt = useDownloadReceipt();
   const generateReceipt = useGenerateReceipt();
@@ -39,6 +64,22 @@ export function OrdersTable({ onView }: OrdersTableProps) {
   };
 
   const isPending = (orderId: string, action: "download" | "generate" | "shipping") => pendingActions[orderId] === action;
+
+  const handleCategoryFilter = (value: string) => {
+    setCategoryFilter(value);
+    setPage(1);
+  };
+
+  const handlePageChange = (nextPage: number) => {
+    if (!meta) return;
+    const clamped = Math.min(Math.max(1, nextPage), meta.pages || 1);
+    setPage(clamped);
+  };
+
+  const handleLimitChange = (nextLimit: number) => {
+    setLimit(nextLimit);
+    setPage(1);
+  };
 
   if (isLoading) {
     return (
@@ -237,6 +278,65 @@ export function OrdersTable({ onView }: OrdersTableProps) {
         open={shippingDialogOpen}
         onOpenChange={setShippingDialogOpen}
       />
+
+      {/* Pagination */}
+      {meta && meta.pages > 1 && (
+        <div className="flex items-center justify-between border-t border-border/60 p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">Rows per page:</span>
+            <Select
+              value={String(limit)}
+              onValueChange={(v) => handleLimitChange(Number(v))}
+            >
+              <SelectTrigger className="h-8 w-[70px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PAGE_SIZES.map((size) => (
+                  <SelectItem key={size} value={String(size)}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => handlePageChange(page - 1)}
+                  aria-disabled={page <= 1}
+                  className={page <= 1 ? "pointer-events-none opacity-50" : undefined}
+                />
+              </PaginationItem>
+
+              {Array.from({ length: meta.pages }, (_, i) => i + 1).map((p) => (
+                <PaginationItem key={p}>
+                  <PaginationLink
+                    isActive={p === page}
+                    onClick={() => handlePageChange(p)}
+                  >
+                    {p}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => handlePageChange(page + 1)}
+                  aria-disabled={page >= meta.pages}
+                  className={page >= meta.pages ? "pointer-events-none opacity-50" : undefined}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+
+          <div className="text-sm text-muted-foreground">
+            Showing {(page - 1) * limit + 1} to {Math.min(page * limit, meta.total)} of {meta.total}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

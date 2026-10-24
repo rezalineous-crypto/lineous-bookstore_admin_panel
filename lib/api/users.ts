@@ -1,6 +1,18 @@
 import apiClient from "./axios";
 import type { User, CreateUserDto, UpdateUserDto, ApiResponse } from "@/lib/types/book";
 
+// Get current user (admin's own profile)
+export const getMe = async (): Promise<ApiResponse<User>> => {
+  const response = await apiClient.get<ApiResponse<User>>("/users/me");
+  return response.data;
+};
+
+// Update current user (admin's own profile)
+export const updateMe = async (dto: UpdateUserDto): Promise<ApiResponse<User>> => {
+  const response = await apiClient.patch<ApiResponse<User>>("/users/me", dto);
+  return response.data;
+};
+
 // Get all users
 export const getUsers = async (): Promise<ApiResponse<User[]>> => {
   const response = await apiClient.get<ApiResponse<User[]>>("/users");
@@ -32,6 +44,8 @@ export const deleteUser = async (id: string): Promise<ApiResponse<null>> => {
 };
 
 export const usersApi = {
+  getMe,
+  updateMe,
   getUsers,
   getUser,
   createUser,

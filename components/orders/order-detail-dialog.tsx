@@ -10,6 +10,8 @@ import { SetShippingDialog } from "./set-shipping-dialog";
 import {
   useOrder,
   useUpdateOrderStatus,
+  useCancelOrder,
+  useReturnOrder,
   useReceiptDetails,
   useGenerateReceipt,
   useDownloadReceipt,
@@ -42,6 +44,8 @@ interface OrderDetailDialogProps {
 export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDialogProps) {
   const { data: order, isLoading, error } = useOrder(orderId ?? "");
   const updateStatus = useUpdateOrderStatus();
+  const cancelOrder = useCancelOrder();
+  const returnOrder = useReturnOrder();
   const { data: receipt } = useReceiptDetails(orderId ?? "");
   const generateReceipt = useGenerateReceipt();
   const downloadReceipt = useDownloadReceipt();
@@ -146,6 +150,47 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
                 </Button>
               </div>
             </div>
+
+            {/* Cancel / Return actions (admin bypasses ownership) */}
+            {order.status !== "CANCELLED" && order.status !== "RETURNED" && (
+              <div className="flex flex-wrap items-center gap-3 rounded-xl border border-border/60 p-4">
+                <span className="text-sm font-medium text-muted-foreground">Quick actions:</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={cancelOrder.isPending}
+                  onClick={async () => {
+                    try {
+                      await cancelOrder.mutateAsync(order.id);
+                    } catch {
+                      // error handled by mutation toast
+                    }
+                  }}
+                >
+                  {cancelOrder.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Cancel Order
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={returnOrder.isPending}
+                  onClick={async () => {
+                    try {
+                      await returnOrder.mutateAsync(order.id);
+                    } catch {
+                      // error handled by mutation toast
+                    }
+                  }}
+                >
+                  {returnOrder.isPending ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : null}
+                  Request Return
+                </Button>
+              </div>
+            )}
 
             <Tabs defaultValue="items" className="w-full">
               <TabsList variant="line" className="w-full justify-start">

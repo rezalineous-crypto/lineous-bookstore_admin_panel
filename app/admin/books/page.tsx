@@ -31,6 +31,7 @@ export default function BooksPage() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: inventoryData, isLoading: inventoryLoading } =
     useInventoryOverview();
@@ -91,11 +92,13 @@ export default function BooksPage() {
         <InventoryStats summary={inventoryData.summary} />
       )}
 
-      {/* <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Search books..."
+            placeholder="Search books by title or description..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="h-10 rounded-md border-border/60 bg-popover pl-10 pr-4"
           />
         </div>
@@ -104,13 +107,14 @@ export default function BooksPage() {
           <SlidersHorizontal className="h-4 w-4" />
           Filters
         </Button>
-      </div> */}
+      </div>
 
       <BooksTable
         onView={handleView}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onAddPaper={(book) => router.push(`/admin/books/${book.id}`)}
+        searchQuery={searchQuery}
       />
 
       {/* Low Stock Alerts */}
