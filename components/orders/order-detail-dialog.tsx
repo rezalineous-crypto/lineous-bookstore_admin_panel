@@ -195,8 +195,8 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
             <Tabs defaultValue="items" className="w-full">
               <TabsList variant="line" className="w-full justify-start">
                 <TabsTrigger value="items">Items</TabsTrigger>
-                {/* <TabsTrigger value="payments">Payments</TabsTrigger>
-                <TabsTrigger value="customer">Customer</TabsTrigger> */}
+                <TabsTrigger value="payments">Payments</TabsTrigger>
+                <TabsTrigger value="customer">Customer</TabsTrigger>
                 <TabsTrigger value="receipt">Receipt</TabsTrigger>
               </TabsList>
 
@@ -204,13 +204,13 @@ export function OrderDetailDialog({ orderId, open, onOpenChange }: OrderDetailDi
                 <OrderItemsTable order={order} />
               </TabsContent>
 
-              {/* <TabsContent value="payments" className="mt-4">
+              <TabsContent value="payments" className="mt-4">
                 <PaymentsList order={order} />
-              </TabsContent> */}
-{/* 
+              </TabsContent>
+
               <TabsContent value="customer" className="mt-4">
                 <CustomerAddress order={order} />
-              </TabsContent> */}
+              </TabsContent>
 
               <TabsContent value="receipt" className="mt-4">
                 <ReceiptSection
@@ -309,7 +309,7 @@ function PaymentsList({ order }: { order: Order }) {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{p.gateway}</span>
+              <span className="font-medium">{p.method ?? "Payment"}</span>
             </div>
             <PaymentStatusBadge status={p.status} />
           </div>
@@ -317,7 +317,7 @@ function PaymentsList({ order }: { order: Order }) {
             <div>
               <p className="text-xs uppercase tracking-wide text-muted-foreground">Amount</p>
               <p className="font-medium text-foreground">
-                {formatBDT(p.amount)} {p.currency}
+                {formatBDT(p.amount)}
               </p>
             </div>
             <div>
@@ -325,8 +325,8 @@ function PaymentsList({ order }: { order: Order }) {
               <p className="font-medium text-foreground">{p.transactionId ?? "-"}</p>
             </div>
             <div>
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Paid at</p>
-              <p className="font-medium text-foreground">{formatDateTime(p.paidAt)}</p>
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Created at</p>
+              <p className="font-medium text-foreground">{formatDateTime(p.createdAt)}</p>
             </div>
           </div>
         </div>
@@ -364,7 +364,11 @@ function CustomerAddress({ order }: { order: Order }) {
           <p className="font-medium text-foreground">{address?.name ?? "-"}</p>
           <p className="text-muted-foreground">{address?.phone ?? "-"}</p>
           <p className="text-muted-foreground">{address?.addressLine ?? "-"}</p>
+          <p className="text-muted-foreground">{address?.area ?? "-"}</p>
           <p className="text-muted-foreground">{address?.district ?? "-"}</p>
+          <p className="text-muted-foreground">{address?.division ?? "-"}</p>
+          <p className="text-muted-foreground">{address?.country ?? "-"}</p>
+          <p className="text-muted-foreground">{address?.postalCode ?? "-"}</p>
         </div>
       </div>
     </div>

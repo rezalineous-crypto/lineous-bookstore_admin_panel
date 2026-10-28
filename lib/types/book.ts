@@ -310,15 +310,12 @@ export interface OrderItem {
 
 export interface Payment {
   id: string;
-  orderId: string;
-  gateway: string;
+  orderId?: string;
+  method?: string;
   transactionId?: string | null;
   amount: string;
-  currency: string;
   status: PaymentStatus;
-  paidAt?: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface OrderUser {
@@ -333,8 +330,12 @@ export interface OrderAddress {
   id: string;
   name?: string;
   phone?: string;
-  district?: string;
   addressLine?: string;
+  area?: string;
+  district?: string;
+  division?: string;
+  country?: string;
+  postalCode?: string;
 }
 
 export interface Order {
