@@ -112,6 +112,7 @@ export function OrdersTable({ onView }: OrdersTableProps) {
       <table className="w-full">
        <thead className="bg-gray-100 font-bold">
           <tr className="border-b border-border/60 bg-muted/30 text-left text-sm">
+             <th className="px-6 py-4 font-semibold text-gray-500">SL</th>
              <th className="px-6 py-4 font-semibold text-gray-500">Order</th>
              <th className="px-6 py-4 font-semibold text-gray-500">Customer</th>
              <th className="px-6 py-4 font-semibold text-gray-500">Total</th>
@@ -124,7 +125,7 @@ export function OrdersTable({ onView }: OrdersTableProps) {
         </thead>
 
         <tbody>
-          {orders.map((order) => {
+          {orders.map((order, idx) => {
             const nextStatuses = getNextOrderStatuses(order.status);
             const statusOptions = [
               { id: order.status, label: OrderStatusLabels[order.status] },
@@ -140,6 +141,12 @@ export function OrdersTable({ onView }: OrdersTableProps) {
                 key={order.id}
                 className="border-b border-border/40 transition-colors last:border-0 hover:bg-muted/20"
               >
+                <td className="px-6 py-4">
+                  <div className="text-center">
+                    <h4 className="font-medium">{idx + 1}</h4>
+                  </div>
+                </td>
+
                 <td className="px-6 py-4">
                   <div>
                     <h4 className="font-medium">{order.orderNumber}</h4>
